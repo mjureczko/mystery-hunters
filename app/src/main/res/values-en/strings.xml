@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mystery Hunters</string>
+
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <!-- Route list -->
+    <string name="route_list_title">Routes</string>
+    <string name="no_routes_yet">There are no routes yet. Add the first one with the button above.</string>
+    <string name="points_summary">Collected %1$d out of %2$d points</string>
+    <string name="delete_route_msg">Do you really want to remove the route \"%1$s\"?</string>
+
+    <!-- Route editor -->
+    <string name="route_editor_title">Route editor</string>
+    <string name="route_name_label">Route name</string>
+    <string name="name_required">Give the route a name first</string>
+    <string name="tap_map_to_add_point">Tap the map to add a point</string>
+    <string name="point_number">Point %1$d</string>
+    <string name="coordinates">%1$.5f, %2$.5f</string>
+    <string name="description_label">Description</string>
+    <string name="no_description">No description</string>
+    <string name="coordinates_required">Pick a place on the map first</string>
+    <string name="delete_point_msg">Do you really want to remove point %1$d?</string>
+    <string name="listening">Listening…</string>
+    <string name="speech_unavailable">Speech recognition is unavailable, please type the description</string>
+    <string name="speech_failed">Speech was not recognised, please type the description</string>
+
+    <!-- Searching -->
+    <string name="searching_title">Hunting</string>
+    <string name="looking_for_point">Looking for point %1$d</string>
+    <string name="no_points_on_route">This route has no points yet</string>
+    <string name="congratulations">Well done! All the mysteries are uncovered!</string>
+
+    <!-- Camera -->
+    <string name="nothing_to_catch_in_range">There is nothing to catch within range</string>
+    <string name="too_far_to_catch">You are too far away, come closer</string>
+
+    <!-- Point detail and collected points -->
+    <string name="point_detail_title">Point</string>
+    <string name="collected_points_title">Collected points</string>
+    <string name="point_caught">Caught</string>
+    <string name="point_not_caught">Not found yet</string>
+    <string name="point_not_caught_yet">This point has not been caught yet</string>
+</resources>

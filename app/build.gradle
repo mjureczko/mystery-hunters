@@ -1,0 +1,256 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-kapt'
+    id 'de.mannodermaus.android-junit'
+    id 'org.jetbrains.kotlin.android'
+    id 'dagger.hilt.android.plugin'
+    id 'org.jetbrains.kotlin.plugin.compose'
+}
+
+android {
+    compileSdk 36
+    defaultConfig {
+        applicationId "pl.marianjureczko.mysteryhunters"
+        minSdkVersion 26
+        targetSdkVersion 36
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "pl.marianjureczko.mysteryhunters.CustomTestRunner"
+        testInstrumentationRunnerArguments["grantPermissions"] = "true"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+        }
+    }
+    kapt {
+        correctErrorTypes = true
+    }
+    sourceSets {
+        test {
+            java.srcDirs += 'src/testShared/java'
+            resources.srcDirs += 'src/testShared/resources'
+        }
+        androidTest {
+            java.srcDirs += 'src/testShared/java'
+            resources.srcDirs += 'src/testShared/resources'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+    buildFeatures {
+        compose true
+        buildConfig = true
+    }
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
+    }
+    packagingOptions {
+        resources {
+            excludes += ['/META-INF/{AL2.0,LGPL2.1}', 'META-INF/LICENSE.md', 'META-INF/LICENSE-notice.md']
+        }
+    }
+    namespace 'pl.marianjureczko.mysteryhunters'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    // Compose
+    implementation platform('androidx.compose:compose-bom:2026.06.01')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-extended'
+    implementation 'androidx.activity:activity-compose:1.13.0'
+    implementation 'androidx.navigation:navigation-compose:2.9.7'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0'
+    implementation 'androidx.core:core-ktx:1.18.0'
+    implementation 'androidx.appcompat:appcompat:1.8.0'
+    implementation 'androidx.window:window:1.5.1'
+
+    // DI
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.3.0'
+
+    // Persistence
+    implementation 'androidx.room:room-runtime:2.8.5'
+    implementation 'androidx.room:room-ktx:2.8.5'
+    kapt 'androidx.room:room-compiler:2.8.5'
+
+    // Compass widget published from maly-poszukiwacz-skarbow to GitHub Packages
+    implementation "pl.marianjureczko.poszukiwacz:compass:${COMPASS_VERSION}"
+    implementation 'com.google.android.gms:play-services-location:21.1.0'
+
+    // OpenStreetMap based map (no proprietary access tokens)
+    implementation 'org.osmdroid:osmdroid-android:6.1.20'
+
+    // Augmented reality: maintained successor of the arcore-sceneform community fork
+    implementation 'io.github.sceneview:arsceneview:4.34.0'
+
+    // Camera fallback used when ARCore is unavailable
+    implementation 'androidx.camera:camera-core:1.6.2'
+    implementation 'androidx.camera:camera-camera2:1.6.2'
+    implementation 'androidx.camera:camera-lifecycle:1.6.2'
+    implementation 'androidx.camera:camera-view:1.6.2'
+
+    // Offline speech to text
+    implementation 'com.alphacephei:vosk-android:0.3.75'
+
+    implementation 'com.google.accompanist:accompanist-permissions:0.37.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_jupiter_version"
+    testImplementation("com.ocadotechnology.gembus:test-arranger:$test_arranger_version") {
+        exclude group: "dk.brics.automaton", module: "automaton"
+    }
+    testImplementation "org.assertj:assertj-core:$assertj_version"
+    testImplementation 'org.mockito:mockito-core:5.23.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:6.3.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
+
+    androidTestImplementation("com.ocadotechnology.gembus:test-arranger:$test_arranger_version") {
+        exclude group: "dk.brics.automaton", module: "automaton"
+    }
+    androidTestImplementation platform('androidx.compose:compose-bom:2026.06.01')
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test:core:1.7.0'
+    androidTestImplementation 'androidx.test:rules:1.7.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+    androidTestImplementation "org.assertj:assertj-core:$assertj_version"
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    androidTestImplementation 'androidx.room:room-testing:2.8.5'
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hilt_version"
+
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+}
+
+configurations {
+    all {
+        exclude group: 'xpp3', module: 'xpp3'
+    }
+}
+
+// The offline speech models are far too big for the repository, they are fetched on demand.
+// Without them the app simply falls back to typing the point description.
+def voskModels = [
+        'vosk-model-small-pl-0.22'   : 'https://alphacephei.com/vosk/models/vosk-model-small-pl-0.22.zip',
+        'vosk-model-small-en-us-0.15': 'https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip'
+]
+
+tasks.register('downloadVoskModels') {
+    group = 'mystery hunters'
+    description = 'Downloads the offline Vosk speech models into app/src/main/assets'
+
+    def assetsDir = layout.projectDirectory.dir('src/main/assets').asFile
+    def downloadsDir = layout.buildDirectory.dir('vosk-downloads').get().asFile
+    def models = voskModels
+
+    doLast {
+        assetsDir.mkdirs()
+        downloadsDir.mkdirs()
+        models.each { name, url ->
+            def target = new File(assetsDir, name)
+            if (target.exists()) {
+                println "$name is already in place"
+                return
+            }
+            def archive = new File(downloadsDir, "${name}.zip")
+            if (!archive.exists()) {
+                println "downloading $url"
+                new URL(url).withInputStream { input ->
+                    archive.withOutputStream { output -> output << input }
+                }
+            }
+            println "unpacking $name"
+            new java.util.zip.ZipFile(archive).withCloseable { zip ->
+                zip.entries().each { entry ->
+                    def outFile = new File(assetsDir, entry.name)
+                    if (!outFile.canonicalPath.startsWith(assetsDir.canonicalPath)) {
+                        throw new GradleException("Refusing to unpack outside the assets directory: ${entry.name}")
+                    }
+                    if (entry.directory) {
+                        outFile.mkdirs()
+                    } else {
+                        outFile.parentFile.mkdirs()
+                        zip.getInputStream(entry).withStream { input ->
+                            outFile.withOutputStream { output -> output << input }
+                        }
+                    }
+                }
+            }
+        }
+        println "Vosk models are ready in ${assetsDir}"
+    }
+}
+
+// Android reflection does not discover CustomArranger subclasses reliably, so every one of them
+// has to be listed in arranger.properties. This guards against forgetting it.
+tasks.register('checkArrangers') {
+    group = 'verification'
+    description = 'Validates that all CustomArranger classes are registered in arranger.properties'
+
+    def arrangerSources = layout.projectDirectory.dir('src/testShared/java').asFile
+    def arrangerProperties = layout.projectDirectory.file('src/testShared/resources/arranger.properties').asFile
+
+    doLast {
+        def foundArrangers = []
+        arrangerSources.eachFileRecurse { file ->
+            if (file.name.endsWith('Arranger.kt') && file.text.contains('CustomArranger')) {
+                def packageMatcher = file.text =~ /package\s+([\w.]+)/
+                if (packageMatcher.find()) {
+                    foundArrangers.add(packageMatcher.group(1) + '.' + file.name.replace('.kt', ''))
+                }
+            }
+        }
+
+        if (!arrangerProperties.exists()) {
+            throw new GradleException("arranger.properties not found at ${arrangerProperties.absolutePath}")
+        }
+        def properties = new Properties()
+        arrangerProperties.withInputStream { properties.load(it) }
+        def registered = properties.getProperty('arranger.android.customArrangers', '')
+                .split(',')
+                .collect { it.trim() }
+                .findAll { !it.isEmpty() }
+
+        def unregistered = foundArrangers.findAll { !registered.contains(it) }
+        if (!unregistered.isEmpty()) {
+            throw new GradleException(
+                    "The following CustomArranger classes are not registered in arranger.properties:\n" +
+                            unregistered.join('\n') +
+                            "\n\nAdd them to the arranger.android.customArrangers property in " +
+                            "src/testShared/resources/arranger.properties")
+        }
+
+        def missing = registered.findAll { !foundArrangers.contains(it) }
+        if (!missing.isEmpty()) {
+            println "WARNING: registered arrangers that were not found in the sources:"
+            missing.each { println "  - $it" }
+        }
+        println "All ${foundArrangers.size()} CustomArranger classes are properly registered"
+    }
+}
+
+tasks.matching { it.name in ['test', 'testDebugUnitTest', 'testReleaseUnitTest', 'connectedDebugAndroidTest'] }
+        .configureEach { it.dependsOn checkArrangers }

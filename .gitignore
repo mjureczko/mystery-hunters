@@ -1,0 +1,12 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+# Vosk speech models are fetched by `./gradlew downloadVoskModels`, never committed.
+/app/src/main/assets/vosk-model-*/

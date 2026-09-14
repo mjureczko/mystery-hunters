@@ -1,0 +1,42 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext.kotlin_version = '2.4.20'
+    ext.agp_version = '9.4.0'
+    ext.hilt_version = '2.60.1'
+    ext.assertj_version = '3.27.3'
+    ext.junit_jupiter_version = '5.14.4'
+    ext.test_arranger_version = '1.7.2'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$agp_version"
+        classpath "org.jetbrains.kotlin:compose-compiler-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:2.0.1"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // The `compass` module of maly-poszukiwacz-skarbow is consumed from GitHub Packages.
+        // Requires gpr.user / gpr.key in ~/.gradle/gradle.properties (or GITHUB_ACTOR / GITHUB_TOKEN).
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/mjureczko/maly-poszukiwacz-skarbow')
+            credentials {
+                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+                password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+            }
+        }
+    }
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}

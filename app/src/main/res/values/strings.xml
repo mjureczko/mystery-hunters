@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Polish is the default locale of the app, English translations live in values-en. -->
+<resources>
+    <string name="app_name">Łowcy Tajemnic</string>
+
+    <string name="ok">OK</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+
+    <!-- Route list -->
+    <string name="route_list_title">Trasy</string>
+    <string name="no_routes_yet">Nie ma jeszcze żadnej trasy. Dodaj pierwszą przyciskiem powyżej.</string>
+    <string name="points_summary">Zebrano %1$d z %2$d punktów</string>
+    <string name="delete_route_msg">Czy na pewno usunąć trasę „%1$s”?</string>
+
+    <!-- Route editor -->
+    <string name="route_editor_title">Edycja trasy</string>
+    <string name="route_name_label">Nazwa trasy</string>
+    <string name="name_required">Najpierw podaj nazwę trasy</string>
+    <string name="tap_map_to_add_point">Dotknij mapy, aby dodać punkt</string>
+    <string name="point_number">Punkt %1$d</string>
+    <string name="coordinates">%1$.5f, %2$.5f</string>
+    <string name="description_label">Opis</string>
+    <string name="no_description">Brak opisu</string>
+    <string name="coordinates_required">Najpierw wskaż miejsce na mapie</string>
+    <string name="delete_point_msg">Czy na pewno usunąć punkt %1$d?</string>
+    <string name="listening">Słucham…</string>
+    <string name="speech_unavailable">Rozpoznawanie mowy jest niedostępne, wpisz opis ręcznie</string>
+    <string name="speech_failed">Nie udało się rozpoznać mowy, wpisz opis ręcznie</string>
+
+    <!-- Searching -->
+    <string name="searching_title">Poszukiwanie</string>
+    <string name="looking_for_point">Szukasz punktu %1$d</string>
+    <string name="no_points_on_route">Ta trasa nie ma jeszcze punktów</string>
+    <string name="congratulations">Brawo! Wszystkie tajemnice odkryte!</string>
+
+    <!-- Camera -->
+    <string name="nothing_to_catch_in_range">W zasięgu nie ma nic do złapania</string>
+    <string name="too_far_to_catch">Jesteś za daleko, podejdź bliżej</string>
+
+    <!-- Point detail and collected points -->
+    <string name="point_detail_title">Punkt</string>
+    <string name="collected_points_title">Zebrane punkty</string>
+    <string name="point_caught">Złapany</string>
+    <string name="point_not_caught">Jeszcze nieznaleziony</string>
+    <string name="point_not_caught_yet">Ten punkt nie został jeszcze złapany</string>
+</resources>
