@@ -10,7 +10,7 @@
     <!-- Route list -->
     <string name="route_list_title">Trasy</string>
     <string name="no_routes_yet">Nie ma jeszcze żadnej trasy. Dodaj pierwszą przyciskiem powyżej.</string>
-    <string name="points_summary">Zebrano %1$d z %2$d punktów</string>
+    <string name="points_summary">Punkty: %1$d / %2$d</string>
     <string name="delete_route_msg">Czy na pewno usunąć trasę „%1$s”?</string>
 
     <!-- Route editor -->

@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import dev.romainguy.kotlin.math.Float3
-import io.github.sceneview.ar.ARScene
+import io.github.sceneview.ar.ARSceneView
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
@@ -27,7 +27,7 @@ fun ArQuestionMark(markerPosition: CalculateMarkerPositionUC.Position?, modifier
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
 
-    ARScene(
+    ARSceneView(
         modifier = modifier.semantics { contentDescription = AR_SCENE },
         engine = engine,
         modelLoader = modelLoader,

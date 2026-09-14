@@ -9,7 +9,7 @@
     <!-- Route list -->
     <string name="route_list_title">Routes</string>
     <string name="no_routes_yet">There are no routes yet. Add the first one with the button above.</string>
-    <string name="points_summary">Collected %1$d out of %2$d points</string>
+    <string name="points_summary">Points: %1$d / %2$d</string>
     <string name="delete_route_msg">Do you really want to remove the route \"%1$s\"?</string>
 
     <!-- Route editor -->
