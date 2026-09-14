@@ -248,6 +248,20 @@ The happy paths run against an emulator. Every port is replaced by a test double
 ./gradlew connectedDebugAndroidTest
 ```
 
+An emulator to run them on, if there is none yet:
+
+```bash
+sdkmanager "system-images;android-36;google_apis;x86_64"
+avdmanager create avd -n mystery_hunters -k "system-images;android-36;google_apis;x86_64" -d pixel_6
+emulator -avd mystery_hunters
+```
+
+Two details are worth knowing when adding tests here. `ARSceneView` renders frame after frame, so
+Compose never reports itself idle and synchronised assertions time out; the camera tests take the
+Compose clock over and advance it by hand. And osmdroid only confirms a single tap after the double
+tap window has passed, so a test that taps the map has to wait for the state to change rather than
+assume the tap was handled at once.
+
 Covered: creating a route, adding a point from the map, editing a point, falling back to text input
 when speech recognition is unavailable, navigating to the first point on the first open, restoring
 the last navigated point, changing the current point, catching a point, catching without ARCore,
@@ -259,6 +273,30 @@ message, reading a caught point's description and the "not caught yet" informati
 `.github/workflows/test_app.yml` runs the unit tests on every push to any branch. It restores
 `gradle.properties` from the `GRADLE_PROPERTIES` secret, which is where the GitHub Packages
 credentials come from.
+
+## Notes on the specification
+
+Decisions taken while building this, worth knowing before changing anything:
+
+- **The compass module lives on a branch.** `pl.marianjureczko.poszukiwacz:compass` is built from the
+  `module_compass` branch of `maly-poszukiwacz-skarbow`, not from `master`, and is published by the
+  `compass-v*` tags. `0.0.2` is the newest published version.
+- **SceneView instead of Sceneform.** The specification names the arcore-sceneform community fork.
+  `io.github.sceneview:arsceneview` is its maintained successor by the same author, and unlike the
+  original (last released in 2022, built against Kotlin 1.6 and targetSdk 31) it works with the
+  current toolchain.
+- **Library versions are the newest that still build against compileSdk 36.** The specification
+  pins compileSdk and targetSdk at 36, and current AndroidX requires 37, so Compose BOM, navigation,
+  lifecycle, core-ktx, hilt-navigation-compose and arsceneview are each one release behind the
+  newest. Raising compileSdk to 37 would allow all of them to move up.
+- **No ARCore means no lost feature.** The specification asks for a fallback but does not say what
+  it should be; the camera screen shows a plain preview with a flat question mark, so catching works
+  the same way on every device.
+- **Points can be removed.** The specification only mentions creating and editing them, but an
+  editor without a delete leaves a mistapped location on the route for good.
+- **Point ids continue after the highest ever used**, matching the reference project. Removing a
+  point from the middle never renumbers the others, which matters because the ids are shown to the
+  user and are immutable.
 
 ## Licence
 
