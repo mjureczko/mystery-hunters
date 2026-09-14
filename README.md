@@ -131,15 +131,16 @@ stateDiagram-v2
 
 ### How the question mark is placed
 
-ARCore does not align its world with north and the Geospatial API would require a Google Cloud key,
-which the project deliberately avoids. Instead the marker is positioned relative to the camera:
+ARCore does not align its world with north, and the Geospatial API that would solve that needs a
+Google Cloud project and a network connection. The app deliberately stays keyless and offline, so
+the marker is positioned relative to the camera instead:
 
 ```mermaid
 sequenceDiagram
     participant GPS as compass LocationPort
     participant Sensor as DeviceOrientationPort
     participant VM as CameraViewModel
-    participant AR as ARScene
+    participant AR as ARSceneView
 
     GPS->>VM: hunter location
     Sensor->>VM: azimuth (degrees from north)
@@ -150,7 +151,15 @@ sequenceDiagram
 ```
 
 Both calculations are plain use cases with no Android dependency, so they are covered by ordinary
-unit tests.
+unit tests. `ARSceneView` is left at its default `GeospatialMode.DISABLED`, so no API key and no
+network connection are involved.
+
+What this costs: the mark is only as accurate as the phone's magnetometer and GPS. Near metal or
+indoors the compass drifts and the mark drifts with it, and it is positioned relative to the phone
+rather than pinned to the world, so it does not stay put when the hunter walks around it. For a
+20 m catch radius that is good enough, and it keeps the game working offline. If you want the mark
+truly anchored to its place on Earth, see [Optional: the ARCore Geospatial
+API](#optional-the-arcore-geospatial-api).
 
 ## Tech stack
 
@@ -216,6 +225,76 @@ works, it just goes straight to the text field instead of offering the microphon
 ```bash
 ./gradlew assembleDebug
 ```
+
+### 5. ARCore API key — not required
+
+**The app needs no Google API key and no Google Cloud project.** It uses plain ARCore motion
+tracking, which is free, offline and keyless. Nothing has to be configured for augmented reality to
+work; on a device without ARCore the camera screen falls back by itself.
+
+An API key only becomes necessary if you move the app onto the ARCore Geospatial API, described
+below. That is an upgrade, not a missing piece.
+
+#### Optional: the ARCore Geospatial API
+
+The Geospatial API places anchors at real world coordinates using Google's Visual Positioning
+System, instead of working the direction out from the phone's compass. The mark would then stay
+exactly where it belongs while the hunter walks around it, and would not drift when the
+magnetometer is disturbed. In exchange it needs a Google Cloud project, a network connection, and
+VPS coverage at the place being hunted — where there is no coverage, and there is none in most of
+the countryside, it cannot resolve a position at all. Keep the current placement as a fallback if
+you take this on.
+
+To configure it:
+
+1. **Create a Google Cloud project** at https://console.cloud.google.com and enable the **ARCore
+   API** (`arcore.googleapis.com`) under *APIs & Services → Library*. The API has a free tier and
+   billing has to be enabled on the project.
+2. **Create an API key** under *APIs & Services → Credentials → Create credentials → API key*.
+   Restrict it: *Application restrictions → Android apps*, adding the package name
+   `pl.marianjureczko.mysteryhunters` together with the SHA-1 of every signing certificate you use
+   (debug and release are different), and *API restrictions → ARCore API*. An unrestricted key can
+   be lifted out of the APK and spent by anyone.
+3. **Keep the key out of the repository.** Put it in `~/.gradle/gradle.properties`:
+
+   ```properties
+   ARCORE_API_KEY=<the key>
+   ```
+
+   and inject it into the manifest from `app/build.gradle`, the way the reference project handles
+   its tokens:
+
+   ```groovy
+   defaultConfig {
+       manifestPlaceholders = [arcoreApiKey: findProperty('ARCORE_API_KEY') ?: '']
+   }
+   ```
+
+   ```xml
+   <meta-data
+       android:name="com.google.android.ar.API_KEY"
+       android:value="${arcoreApiKey}" />
+   ```
+
+   For CI the key belongs in the `GRADLE_PROPERTIES` secret that the pipeline already restores.
+4. **Turn the mode on** in `ArQuestionMark.kt`:
+
+   ```kotlin
+   ARSceneView(
+       geospatialMode = Config.GeospatialMode.ENABLED,
+       ...
+   )
+   ```
+5. **Anchor the mark to the Earth** instead of positioning it relative to the camera. Points of
+   interest store latitude and longitude but no altitude, so a terrain anchor is the one to use:
+   once `Earth.trackingState` is `TRACKING`, call
+   `Earth.resolveAnchorOnTerrainAsync(latitude, longitude, altitudeAboveTerrain, qx, qy, qz, qw,
+   callback)`; it reports the anchor and a `TerrainAnchorState` through the callback, and that
+   anchor goes into an `AnchorNode`. `CalculateBearingUC`,
+   `CalculateMarkerPositionUC` and `DeviceOrientationPort` are then no longer needed for placement.
+
+`IsPointInCatchRangeUC` is untouched by all of this: whether a point may be caught is decided from
+the GPS distance, not from what the camera renders.
 
 ## Testing
 
@@ -289,6 +368,10 @@ Decisions taken while building this, worth knowing before changing anything:
   pins compileSdk and targetSdk at 36, and current AndroidX requires 37, so Compose BOM, navigation,
   lifecycle, core-ktx, hilt-navigation-compose and arsceneview are each one release behind the
   newest. Raising compileSdk to 37 would allow all of them to move up.
+- **Augmented reality needs no API key.** Plain ARCore motion tracking is keyless and offline. The
+  mark's position is worked out from the hunter's GPS and the phone's compass rather than from the
+  Geospatial API, which would have required a Google Cloud project, a network connection and VPS
+  coverage. Setup step 5 describes how to switch if that trade is ever worth making.
 - **No ARCore means no lost feature.** The specification asks for a fallback but does not say what
   it should be; the camera screen shows a plain preview with a flat question mark, so catching works
   the same way on every device.
