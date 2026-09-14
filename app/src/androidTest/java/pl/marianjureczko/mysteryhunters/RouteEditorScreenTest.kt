@@ -4,6 +4,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.click
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.performTextInput
 import com.ocadotechnology.gembus.test.someString
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -11,7 +14,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import pl.marianjureczko.mysteryhunters.model.PointOfInterest
 import pl.marianjureczko.mysteryhunters.model.RouteArranger
+import androidx.compose.ui.semantics.SemanticsProperties
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.MICROPHONE_BUTTON
+import pl.marianjureczko.mysteryhunters.screen.routeeditor.POINT_COORDINATES_LABEL
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.POINT_DESCRIPTION_FIELD
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.ROUTE_MAP
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.ROUTE_NAME_FIELD
@@ -74,7 +79,13 @@ class RouteEditorScreenTest : AbstractUiTest() {
         // when
         composeRule.onNodeWithContentDescription(POINT_DESCRIPTION_FIELD).performTextClearance()
         composeRule.onNodeWithContentDescription(POINT_DESCRIPTION_FIELD).performTextInput(newDescription)
-        composeRule.onNodeWithContentDescription(ROUTE_MAP).performClick()
+        val originalCoordinates = displayedCoordinates()
+        composeRule.onNodeWithContentDescription(ROUTE_MAP).performTouchInput {
+            // away from the centre, which is where the map recentred on the edited point
+            click(Offset(width * 0.25f, height * 0.25f))
+        }
+        // osmdroid only confirms a single tap once the double tap window has passed
+        composeRule.waitUntil(WAIT_TIMEOUT_IN_MILLIS) { displayedCoordinates() != originalCoordinates }
         composeRule.onNodeWithContentDescription(SAVE_POINT_BUTTON).performClick()
 
         // then
@@ -102,6 +113,12 @@ class RouteEditorScreenTest : AbstractUiTest() {
         // then
         composeRule.onNodeWithContentDescription(POINT_DESCRIPTION_FIELD).assertIsDisplayed()
     }
+
+    private fun displayedCoordinates(): String =
+        composeRule.onNodeWithContentDescription(POINT_COORDINATES_LABEL)
+            .fetchSemanticsNode()
+            .config[SemanticsProperties.Text]
+            .joinToString { it.text }
 
     private fun openEditorOf(routeName: String) {
         waitUntilDisplayed("$EDIT_ROUTE_BUTTON $routeName")

@@ -41,6 +41,7 @@ import java.util.Locale
 const val ROUTE_NAME_FIELD = "Route name"
 const val SAVE_ROUTE_NAME_BUTTON = "Save route name"
 const val POINT_DESCRIPTION_FIELD = "Point description"
+const val POINT_COORDINATES_LABEL = "Point coordinates"
 const val SAVE_POINT_BUTTON = "Save point"
 const val CLOSE_POINT_EDITOR_BUTTON = "Close point editor"
 const val MICROPHONE_BUTTON = "Dictate description"
@@ -162,7 +163,8 @@ private fun PointEditor(
                     state.draftLatitude ?: 0.0,
                     state.draftLongitude ?: 0.0
                 ),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.semantics { contentDescription = POINT_COORDINATES_LABEL }
             )
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(

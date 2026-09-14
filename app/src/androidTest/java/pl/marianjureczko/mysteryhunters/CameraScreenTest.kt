@@ -32,14 +32,13 @@ class CameraScreenTest : AbstractUiTest() {
 
         // when
         openCameraScreen(route.name)
-        waitUntilDisplayed(BIG_CATCH_BUTTON)
         composeRule.onNodeWithContentDescription(BIG_CATCH_BUTTON).performClick()
 
         // then
-        composeRule.waitUntil(WAIT_TIMEOUT_IN_MILLIS) {
+        waitWhileAdvancingFrames("the point is caught") {
             storedRoute(route.id)?.pointById(1)?.caught == true
         }
-        waitUntilDisplayed(POINT_DESCRIPTION_LABEL)
+        waitWhileAdvancingFrames("the point description shows up") { isDisplayed(POINT_DESCRIPTION_LABEL) }
         assertThat(storedRoute(route.id)?.pointById(1)?.caught).isTrue()
     }
 
@@ -50,11 +49,10 @@ class CameraScreenTest : AbstractUiTest() {
 
         // when
         openCameraScreen(route.name)
-        waitUntilDisplayed(BIG_CATCH_BUTTON)
         composeRule.onNodeWithContentDescription(BIG_CATCH_BUTTON).performClick()
 
         // then
-        composeRule.waitUntil(WAIT_TIMEOUT_IN_MILLIS) {
+        waitWhileAdvancingFrames("the hunt moves on to the next point") {
             storedRoute(route.id)?.lastSelectedPointId == 2
         }
         assertThat(storedRoute(route.id)?.lastSelectedPointId).isEqualTo(2)
@@ -67,12 +65,11 @@ class CameraScreenTest : AbstractUiTest() {
 
         // when
         openCameraScreen(route.name)
-        waitUntilDisplayed(BIG_CATCH_BUTTON)
         composeRule.onNodeWithContentDescription(BIG_CATCH_BUTTON).performClick()
 
         // then
-        waitUntilDisplayed(TOO_FAR_DIALOG)
-        composeRule.onNodeWithContentDescription(NOTHING_IN_RANGE_MESSAGE).assertIsDisplayed()
+        waitWhileAdvancingFrames("the too far dialog shows up") { isDisplayed(TOO_FAR_DIALOG) }
+        assertThat(isDisplayed(NOTHING_IN_RANGE_MESSAGE)).isTrue()
         assertThat(storedRoute(route.id)?.pointById(1)?.caught).isFalse()
     }
 
@@ -86,8 +83,8 @@ class CameraScreenTest : AbstractUiTest() {
         openCameraScreen(route.name)
 
         // then
-        waitUntilDisplayed(AR_SCENE)
-        composeRule.onNodeWithContentDescription(AR_SCENE).assertIsDisplayed()
+        waitWhileAdvancingFrames("the augmented reality scene shows up") { isDisplayed(AR_SCENE) }
+        assertThat(isDisplayed(AR_SCENE)).isTrue()
     }
 
     @Test
@@ -139,5 +136,9 @@ class CameraScreenTest : AbstractUiTest() {
         composeRule.onNodeWithContentDescription("$SELECT_ROUTE_BUTTON $routeName").performClick()
         waitUntilDisplayed(CATCH_POINT_BUTTON)
         composeRule.onNodeWithContentDescription(CATCH_POINT_BUTTON).performClick()
+        if (arAvailabilityPort.available) {
+            takeOverTheComposeClock()
+        }
+        waitWhileAdvancingFrames("the camera screen shows up") { isDisplayed(BIG_CATCH_BUTTON) }
     }
 }
