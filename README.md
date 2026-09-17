@@ -1,5 +1,7 @@
 # Mystery Hunters (Łowcy Tajemnic)
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+
 An Android treasure hunting game. A hunter picks a route, follows a compass to the next point of
 interest, and when close enough uncovers a three dimensional question mark through the camera. Every
 point carries a description that is revealed once the point has been caught.
@@ -282,7 +284,7 @@ To configure it:
    ```kotlin
    ARSceneView(
        geospatialMode = Config.GeospatialMode.ENABLED,
-       ...
+       
    )
    ```
 5. **Anchor the mark to the Earth** instead of positioning it relative to the camera. Points of
@@ -383,4 +385,19 @@ Decisions taken while building this, worth knowing before changing anything:
 
 ## Licence
 
-GPLv3, as the reference project.
+This project is licensed under the [GNU General Public License v3.0 or later](LICENSE)
+(GPL-3.0-or-later, `SPDX-License-Identifier: GPL-3.0-or-later`), as the reference project
+[maly-poszukiwacz-skarbow](https://github.com/mjureczko/maly-poszukiwacz-skarbow).
+
+Copyright (C) 2026 Marian Jureczko
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not,
+see <https://www.gnu.org/licenses/>.

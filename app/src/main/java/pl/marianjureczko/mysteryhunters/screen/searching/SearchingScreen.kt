@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2026 Marian Jureczko
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 package pl.marianjureczko.mysteryhunters.screen.searching
 
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +37,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.navigation.NavController
@@ -63,7 +83,7 @@ fun SearchingScreen(navController: NavController) {
                     selectedTreasure = selectedPoint?.let {
                         AndroidLocation.create(it.latitude, it.longitude)
                     },
-                    height = 0.49.dh,
+                    height = 0.59.dh,
                     textStyle = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -95,7 +115,7 @@ private fun Header(state: SearchingState) {
         if (state.allCaught) {
             Text(
                 text = stringResource(R.string.congratulations),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { contentDescription = CONGRATULATIONS_LABEL }
             )
@@ -104,13 +124,13 @@ private fun Header(state: SearchingState) {
                 text = state.selectedPoint
                     ?.let { stringResource(R.string.looking_for_point, it.id) }
                     ?: stringResource(R.string.no_points_on_route),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.semantics { contentDescription = SEARCHED_POINT_LABEL }
             )
         }
         Text(
             text = stringResource(R.string.points_summary, state.caughtCount, state.pointsCount),
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.semantics { contentDescription = PROGRESS_LABEL }
         )
     }
