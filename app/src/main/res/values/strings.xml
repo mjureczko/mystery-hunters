@@ -30,6 +30,7 @@
 
     <!-- Searching -->
     <string name="searching_title">Poszukiwanie</string>
+    <string name="location_permission_needed">Kompas wymaga dostępu do lokalizacji. Dotknij, aby zezwolić.</string>
     <string name="looking_for_point">Szukasz tajemnicy %1$d</string>
     <string name="no_points_on_route">Ta trasa nie ma jeszcze punktów</string>
     <string name="congratulations">Brawo! Wszystkie tajemnice odkryte!</string>

@@ -19,6 +19,8 @@
 
 package pl.marianjureczko.mysteryhunters.screen.searching
 
+import android.Manifest
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,10 +40,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import pl.marianjureczko.mysteryhunters.R
 import pl.marianjureczko.mysteryhunters.screen.Screens
 import pl.marianjureczko.mysteryhunters.ui.Screen.dh
@@ -56,11 +61,14 @@ const val COLLECTED_POINTS_BUTTON = "Collected points"
 const val SEARCHED_POINT_LABEL = "Searched point"
 const val PROGRESS_LABEL = "Collected progress"
 const val CONGRATULATIONS_LABEL = "Congratulations"
+const val LOCATION_PERMISSION_LABEL = "Location permission info"
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SearchingScreen(navController: NavController) {
     val viewModel: SearchingViewModel = hiltViewModel()
     val state = viewModel.state.value
+    val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     // Coming back from the camera screen has to pick up the freshly caught point.
     LifecycleResumeEffect(Unit) {
@@ -79,14 +87,18 @@ fun SearchingScreen(navController: NavController) {
             ) {
                 Header(state)
                 val selectedPoint = state.selectedPoint
-                CompassAndSteps(
-                    selectedTreasure = selectedPoint?.let {
-                        AndroidLocation.create(it.latitude, it.longitude)
-                    },
-                    height = 0.59.dh,
-                    textStyle = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (locationPermission.status.isGranted) {
+                    CompassAndSteps(
+                        selectedTreasure = selectedPoint?.let {
+                            AndroidLocation.create(it.latitude, it.longitude)
+                        },
+                        height = 0.59.dh,
+                        textStyle = MaterialTheme.typography.displayLarge,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    LocationPermissionRequest { locationPermission.launchPermissionRequest() }
+                }
                 Buttons(
                     enabled = state.hasPoints && selectedPoint != null,
                     onCatch = {
@@ -101,6 +113,26 @@ fun SearchingScreen(navController: NavController) {
                 )
             }
         }
+    )
+}
+
+/**
+ * The compass module silently skips fetching locations without the fine location permission,
+ * so it must be granted at runtime before the compass is shown.
+ */
+@Composable
+private fun LocationPermissionRequest(onRequest: () -> Unit) {
+    LaunchedEffect(Unit) {
+        onRequest()
+    }
+    Text(
+        text = stringResource(R.string.location_permission_needed),
+        style = MaterialTheme.typography.bodyLarge,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .padding(12.dp)
+            .clickable { onRequest() }
+            .semantics { contentDescription = LOCATION_PERMISSION_LABEL }
     )
 }
 

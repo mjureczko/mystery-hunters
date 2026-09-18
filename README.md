@@ -2,12 +2,9 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-An Android treasure hunting game. A hunter picks a route, follows a compass to the next point of
-interest, and when close enough uncovers a three dimensional question mark through the camera. Every
-point carries a description that is revealed once the point has been caught.
-
-The app is the successor of [maly-poszukiwacz-skarbow](https://github.com/mjureczko/maly-poszukiwacz-skarbow)
-and reuses its `compass` module, consumed as a published artifact rather than as source.
+An Android mystery hunting game. 
+A hunter picks a route, follows a compass to the next mistery, and when close enough uncovers a three dimensional question mark through the camera. 
+Every point carries a description that is revealed once the point has been caught.
 
 ## Features
 
@@ -18,7 +15,7 @@ and reuses its `compass` module, consumed as a published artifact rather than as
   Polish and an English model. Nothing is sent to a network service and no audio is stored. When the
   engine or the model is unavailable, or the hunter does not like the result, the text field is
   always there to fall back to.
-- **Compass navigation** showing direction and distance in steps to the current point, delivered by
+- **Compass navigation** showing direction and distance in steps to the current mystery, delivered by
   the `compass` module.
 - **Augmented reality catching.** Within 20 m of a point a three dimensional question mark appears in
   the camera picture; beyond that range the screen says there is nothing to catch.
@@ -152,16 +149,13 @@ sequenceDiagram
     VM->>AR: position of the question mark
 ```
 
-Both calculations are plain use cases with no Android dependency, so they are covered by ordinary
-unit tests. `ARSceneView` is left at its default `GeospatialMode.DISABLED`, so no API key and no
-network connection are involved.
+Both calculations are plain use cases with no Android dependency, so they are covered by ordinary unit tests. 
+`ARSceneView` is left at its default `GeospatialMode.DISABLED`, so no API key and no network connection are involved.
 
-What this costs: the mark is only as accurate as the phone's magnetometer and GPS. Near metal or
-indoors the compass drifts and the mark drifts with it, and it is positioned relative to the phone
-rather than pinned to the world, so it does not stay put when the hunter walks around it. For a
-20 m catch radius that is good enough, and it keeps the game working offline. If you want the mark
-truly anchored to its place on Earth, see [Optional: the ARCore Geospatial
-API](#optional-the-arcore-geospatial-api).
+What this costs: the mark is only as accurate as the phone's magnetometer and GPS. 
+Near metal or indoors the compass drifts and the mark drifts with it, and it is positioned relative to the phone rather than pinned to the world, so it does not stay put when the hunter walks around it. 
+For a 20 m catch radius that is good enough, and it keeps the game working offline. 
+If you want the mark truly anchored to its place on Earth, see [Optional: the ARCore Geospatial API](#optional-the-arcore-geospatial-api).
 
 ## Tech stack
 
@@ -181,15 +175,15 @@ API](#optional-the-arcore-geospatial-api).
 | Speech to text | Vosk 0.3.75, offline |
 | Tests | JUnit 5.14.4, AssertJ 3.27.3, test-arranger 1.7.2 |
 
-The library versions are the newest ones that still build against `compileSdk 36`. Anything newer
-(Compose BOM 2026.08.00 and later, navigation 2.10, arsceneview 4.35) demands `compileSdk 37`.
+The library versions are the newest ones that still build against `compileSdk 36`. 
+Anything newer (Compose BOM 2026.08.00 and later, navigation 2.10, arsceneview 4.35) demands `compileSdk 37`.
 
 ## Setup
 
 ### 1. Android SDK
 
-Android Studio, or a command line SDK with platform 36 and build tools 36. `local.properties` has to
-point at it:
+Android Studio, or a command line SDK with platform 36 and build tools 36. 
+`local.properties` has to point at it:
 
 ```properties
 sdk.dir=/path/to/Android/Sdk

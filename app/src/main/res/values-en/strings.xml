@@ -29,6 +29,7 @@
 
     <!-- Searching -->
     <string name="searching_title">Hunting</string>
+    <string name="location_permission_needed">The compass needs access to your location. Tap to allow.</string>
     <string name="looking_for_point">Looking for mystery %1$d</string>
     <string name="no_points_on_route">This route has no points yet</string>
     <string name="congratulations">Well done! All the mysteries are uncovered!</string>
