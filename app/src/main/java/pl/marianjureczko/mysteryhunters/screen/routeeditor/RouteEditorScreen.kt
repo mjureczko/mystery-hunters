@@ -22,14 +22,17 @@ package pl.marianjureczko.mysteryhunters.screen.routeeditor
 import android.Manifest
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -65,6 +68,7 @@ const val SAVE_POINT_BUTTON = "Save point"
 const val CLOSE_POINT_EDITOR_BUTTON = "Close point editor"
 const val MICROPHONE_BUTTON = "Dictate description"
 const val STOP_MICROPHONE_BUTTON = "Stop dictating"
+const val SPEECH_PREPARING_INDICATOR = "Preparing speech recognition"
 const val EDIT_POINT_BUTTON = "Edit point"
 const val DELETE_POINT_BUTTON = "Delete point"
 const val POINTS_LIST = "Points list"
@@ -191,7 +195,9 @@ private fun PointEditor(
                     onValueChange = onDescriptionChanged,
                     label = { Text(stringResource(R.string.description_label)) },
                     supportingText = {
-                        if (state.listening) {
+                        if (state.preparingSpeech) {
+                            Text(stringResource(R.string.preparing_speech))
+                        } else if (state.listening) {
                             Text(state.recognizedPartial.ifBlank { stringResource(R.string.listening) })
                         }
                     },
@@ -199,7 +205,18 @@ private fun PointEditor(
                         .weight(1f)
                         .semantics { contentDescription = POINT_DESCRIPTION_FIELD }
                 )
-                if (state.listening) {
+                // The spinner takes the same room as the icons it replaces so the row does not jump.
+                if (state.preparingSpeech) {
+                    Box(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .size(48.dp)
+                            .semantics { contentDescription = SPEECH_PREPARING_INDICATOR },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(36.dp))
+                    }
+                } else if (state.listening) {
                     ImageButton(R.drawable.stop_listening, STOP_MICROPHONE_BUTTON, onClick = onStopListening)
                 } else {
                     ImageButton(R.drawable.microphone, MICROPHONE_BUTTON, onClick = onStartListening)

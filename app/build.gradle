@@ -167,42 +167,63 @@ tasks.register('downloadVoskModels') {
     def downloadsDir = layout.buildDirectory.dir('vosk-downloads').get().asFile
     def models = voskModels
 
+    // Gradle creates the parent directory of every declared output before the action runs, so the
+    // model directory alone proves nothing, only a file that came out of the archive does.
+    def isUnpacked = { File dir -> dir.listFiles()?.any { it.name != 'uuid' } }
+
+    outputs.files(models.keySet().collect { new File(assetsDir, "${it}/uuid") })
+    outputs.upToDateWhen {
+        models.keySet().every { isUnpacked(new File(assetsDir, it)) && new File(assetsDir, "${it}/uuid").exists() }
+    }
+
     doLast {
         assetsDir.mkdirs()
         downloadsDir.mkdirs()
         models.each { name, url ->
             def target = new File(assetsDir, name)
-            if (target.exists()) {
+            if (isUnpacked(target)) {
                 println "$name is already in place"
-                return
-            }
-            def archive = new File(downloadsDir, "${name}.zip")
-            if (!archive.exists()) {
-                println "downloading $url"
-                new URL(url).withInputStream { input ->
-                    archive.withOutputStream { output -> output << input }
-                }
-            }
-            println "unpacking $name"
-            new java.util.zip.ZipFile(archive).withCloseable { zip ->
-                zip.entries().each { entry ->
-                    def outFile = new File(assetsDir, entry.name)
-                    if (!outFile.canonicalPath.startsWith(assetsDir.canonicalPath)) {
-                        throw new GradleException("Refusing to unpack outside the assets directory: ${entry.name}")
+            } else {
+                def archive = new File(downloadsDir, "${name}.zip")
+                if (!archive.exists()) {
+                    println "downloading $url"
+                    new URL(url).withInputStream { input ->
+                        archive.withOutputStream { output -> output << input }
                     }
-                    if (entry.directory) {
-                        outFile.mkdirs()
-                    } else {
-                        outFile.parentFile.mkdirs()
-                        zip.getInputStream(entry).withStream { input ->
-                            outFile.withOutputStream { output -> output << input }
+                }
+                println "unpacking $name"
+                new java.util.zip.ZipFile(archive).withCloseable { zip ->
+                    zip.entries().each { entry ->
+                        def outFile = new File(assetsDir, entry.name)
+                        if (!outFile.canonicalPath.startsWith(assetsDir.canonicalPath)) {
+                            throw new GradleException("Refusing to unpack outside the assets directory: ${entry.name}")
+                        }
+                        if (entry.directory) {
+                            outFile.mkdirs()
+                        } else {
+                            outFile.parentFile.mkdirs()
+                            zip.getInputStream(entry).withStream { input ->
+                                outFile.withOutputStream { output -> output << input }
+                            }
                         }
                     }
                 }
             }
+            // Vosk copies the model out of the assets onto the file system and uses this marker to
+            // tell whether that copy is still current. The archives published by alphacephei do not
+            // carry it and StorageService.sync reads it before anything else, so without it every
+            // initialisation dies on a FileNotFoundException and the app falls back to typing. The
+            // model name carries the version, which also invalidates the on device copy on upgrade.
+            new File(target, 'uuid').text = "${name}\n"
         }
         println "Vosk models are ready in ${assetsDir}"
     }
+}
+
+// An APK without the models cannot recognise a word, so packaging always fetches them first. Unit
+// tests do not merge assets, which keeps the 95 MB download out of CI.
+tasks.matching { it.name ==~ /merge[A-Z]\w*Assets/ }.configureEach {
+    dependsOn 'downloadVoskModels'
 }
 
 // Android reflection does not discover CustomArranger subclasses reliably, so every one of them

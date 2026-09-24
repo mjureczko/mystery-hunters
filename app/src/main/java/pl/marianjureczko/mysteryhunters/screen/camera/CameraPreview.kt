@@ -23,6 +23,8 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -31,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.camera.core.CameraSelector
+import java.util.concurrent.atomic.AtomicReference
 
 const val CAMERA_PREVIEW = "Camera preview"
 
@@ -42,6 +45,15 @@ const val CAMERA_PREVIEW = "Camera preview"
 fun CameraPreview(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val boundProvider = remember { AtomicReference<ProcessCameraProvider?>(null) }
+
+    // CameraX binds to the lifecycle of the activity, not to this composable, so without an
+    // explicit release the preview goes on holding the camera long after it has left the screen.
+    // A phone with ARCore then has two camera clients inside one application, they evict each
+    // other several times a second and the augmented reality picture freezes.
+    DisposableEffect(Unit) {
+        onDispose { boundProvider.getAndSet(null)?.unbindAll() }
+    }
 
     AndroidView(
         modifier = modifier.semantics { contentDescription = CAMERA_PREVIEW },
@@ -56,6 +68,7 @@ fun CameraPreview(modifier: Modifier = Modifier) {
                 try {
                     cameraProvider.unbindAll()
                     cameraProvider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview)
+                    boundProvider.set(cameraProvider)
                 } catch (e: Exception) {
                     // the screen still works, only without the live picture
                 }

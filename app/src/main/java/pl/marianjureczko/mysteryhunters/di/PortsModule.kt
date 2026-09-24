@@ -34,6 +34,7 @@ import pl.marianjureczko.mysteryhunters.port.DeviceOrientationPort
 import pl.marianjureczko.mysteryhunters.port.RouteStoragePort
 import pl.marianjureczko.mysteryhunters.port.SpeechToTextPort
 import pl.marianjureczko.mysteryhunters.port.ar.ArCoreAvailabilityPort
+import pl.marianjureczko.mysteryhunters.port.location.SharedLocationPort
 import pl.marianjureczko.mysteryhunters.port.orientation.SensorDeviceOrientationPort
 import pl.marianjureczko.mysteryhunters.port.speech.VoskSpeechToTextPort
 import pl.marianjureczko.mysteryhunters.port.storage.MysteryHuntersDatabase
@@ -94,5 +95,7 @@ object PortsModule {
         locationClient: FusedLocationProviderClient,
         @CompassIoDispatcher ioDispatcher: CoroutineDispatcher,
         @CompassMainDispatcher mainDispatcher: CoroutineDispatcher
-    ): LocationPort = LocationPort.create(appContext, locationClient, ioDispatcher, mainDispatcher)
+    ): LocationPort = SharedLocationPort(
+        LocationPort.create(appContext, locationClient, ioDispatcher, mainDispatcher)
+    )
 }

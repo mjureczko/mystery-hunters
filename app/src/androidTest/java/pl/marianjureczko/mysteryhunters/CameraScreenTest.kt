@@ -30,6 +30,8 @@ import pl.marianjureczko.mysteryhunters.model.RouteArranger
 import pl.marianjureczko.mysteryhunters.screen.camera.AR_SCENE
 import pl.marianjureczko.mysteryhunters.screen.camera.BIG_CATCH_BUTTON
 import pl.marianjureczko.mysteryhunters.screen.camera.CAMERA_PREVIEW
+import pl.marianjureczko.mysteryhunters.screen.camera.CLOSE_LOOK_AROUND_MESSAGE
+import pl.marianjureczko.mysteryhunters.screen.camera.MARK_NOT_VISIBLE_DIALOG
 import pl.marianjureczko.mysteryhunters.screen.camera.FLAT_QUESTION_MARK
 import pl.marianjureczko.mysteryhunters.screen.camera.NOTHING_IN_RANGE_MESSAGE
 import pl.marianjureczko.mysteryhunters.screen.camera.TOO_FAR_DIALOG
@@ -47,6 +49,7 @@ class CameraScreenTest : AbstractUiTest() {
     @Test
     fun catchThePointWhenTheHunterStandsCloseEnough() {
         // given
+        arAvailabilityPort.available = false
         val route = givenRouteWithHunterStandingMetersAway(0.0)
 
         // when
@@ -64,6 +67,7 @@ class CameraScreenTest : AbstractUiTest() {
     @Test
     fun switchToTheNextNotCaughtPointAfterCatching() {
         // given
+        arAvailabilityPort.available = false
         val route = givenRouteWithHunterStandingMetersAway(0.0, pointsCount = 3)
 
         // when
@@ -137,6 +141,68 @@ class CameraScreenTest : AbstractUiTest() {
             storedRoute(route.id)?.pointById(1)?.caught == true
         }
         assertThat(storedRoute(route.id)?.pointById(1)?.caught).isTrue()
+    }
+
+    /**
+     * Where the point lies and how far it is are measured only when a position fix comes in, so a
+     * hunter who walks into range while holding the phone perfectly still has to be noticed by the
+     * position fix alone.
+     */
+    @Test
+    fun showTheQuestionMarkWhenTheHunterWalksIntoRange() {
+        // given
+        arAvailabilityPort.available = false
+        val route = givenRouteWithHunterStandingMetersAway(100.0)
+        openCameraScreen(route.name)
+        waitUntilDisplayed(NOTHING_IN_RANGE_MESSAGE)
+
+        // when
+        composeRule.runOnIdle { locationPort.moveTo(AndroidLocation.create(52.0, 21.0)) }
+
+        // then
+        waitUntilDisplayed(FLAT_QUESTION_MARK)
+        assertThat(isDisplayed(NOTHING_IN_RANGE_MESSAGE)).isFalse()
+    }
+
+    /**
+     * Being close enough is not the same as having spotted the mark - it stands somewhere around
+     * the hunter and may well be behind a wall - so the screen says so rather than going quiet.
+     */
+    @Test
+    fun tellTheHunterToLookAroundOnceCloseEnough() {
+        // given
+        arAvailabilityPort.available = false
+        val route = givenRouteWithHunterStandingMetersAway(0.0)
+
+        // when
+        openCameraScreen(route.name)
+
+        // then
+        waitUntilDisplayed(CLOSE_LOOK_AROUND_MESSAGE)
+        assertThat(isDisplayed(NOTHING_IN_RANGE_MESSAGE)).isFalse()
+    }
+
+    /**
+     * Standing on top of the point is not enough on a phone that draws the mark in the scene: the
+     * mark has to be on the screen, with nothing in front of it, before it can be caught. Here the
+     * scene never starts tracking, so it can never show the mark, and the hunt says so instead of
+     * handing over the point.
+     */
+    @Test
+    fun refuseToCatchWhileTheMarkCannotBeSeen() {
+        // given
+        arAvailabilityPort.available = true
+        val route = givenRouteWithHunterStandingMetersAway(0.0)
+
+        // when
+        openCameraScreen(route.name)
+        composeRule.onNodeWithContentDescription(BIG_CATCH_BUTTON).performClick()
+
+        // then
+        waitWhileAdvancingFrames("the mark is not visible dialog shows up") {
+            isDisplayed(MARK_NOT_VISIBLE_DIALOG)
+        }
+        assertThat(storedRoute(route.id)?.pointById(1)?.caught).isFalse()
     }
 
     private fun givenRouteWithHunterStandingMetersAway(meters: Double, pointsCount: Int = 1): Route {

@@ -51,7 +51,9 @@ import pl.marianjureczko.mysteryhunters.ui.components.OkDialog
 
 const val BIG_CATCH_BUTTON = "Big catch button"
 const val NOTHING_IN_RANGE_MESSAGE = "Nothing in range"
+const val CLOSE_LOOK_AROUND_MESSAGE = "Close, look around"
 const val TOO_FAR_DIALOG = "Too far dialog"
+const val MARK_NOT_VISIBLE_DIALOG = "Mark not visible dialog"
 const val FLAT_QUESTION_MARK = "Flat question mark"
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -78,41 +80,59 @@ fun CameraScreen(navController: NavController, routeId: Long) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        val notVisible = state.catchRefusal == CatchRefusal.MARK_NOT_VISIBLE
         OkDialog(
-            visible = state.tooFarMessageShown,
-            hideIt = { viewModel.hideTooFarMessage() },
-            text = stringResource(R.string.too_far_to_catch),
-            description = TOO_FAR_DIALOG
+            visible = state.catchRefusal != null,
+            hideIt = { viewModel.hideCatchRefusal() },
+            text = stringResource(
+                if (notVisible) R.string.cannot_catch_mark_not_visible else R.string.too_far_to_catch
+            ),
+            description = if (notVisible) MARK_NOT_VISIBLE_DIALOG else TOO_FAR_DIALOG
         )
         if (cameraPermission.status.isGranted) {
-            if (state.arAvailable) {
-                ArQuestionMark(state.markerPosition, Modifier.fillMaxSize())
-            } else {
-                CameraPreview(Modifier.fillMaxSize())
-                if (state.inRange) {
-                    ImageButton(
-                        drawableId = R.drawable.question_mark,
-                        description = FLAT_QUESTION_MARK,
-                        modifier = Modifier.align(Alignment.Center),
-                        onClick = { viewModel.catchPoint() }
-                    )
+            // Nothing is drawn while the ARCore check is still running. Showing the plain preview
+            // in the meantime would bind CameraX to the camera, and CameraX would then keep
+            // fighting ARCore over it for as long as the activity lives.
+            when (state.arAvailable) {
+                true -> ArQuestionMark(
+                    markerPosition = state.markerPosition,
+                    onCameraHeadingInScene = viewModel::onCameraHeadingInScene,
+                    onMarkVisible = viewModel::onMarkVisible,
+                    modifier = Modifier.fillMaxSize()
+                )
+                false -> {
+                    CameraPreview(Modifier.fillMaxSize())
+                    if (state.inRange) {
+                        ImageButton(
+                            drawableId = R.drawable.question_mark,
+                            description = FLAT_QUESTION_MARK,
+                            modifier = Modifier.align(Alignment.Center),
+                            onClick = { viewModel.catchPoint() }
+                        )
+                    }
                 }
+                null -> Unit
             }
         }
-        if (!state.inRange) {
-            Text(
-                text = stringResource(R.string.nothing_to_catch_in_range),
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .padding(12.dp)
-                    .semantics { contentDescription = NOTHING_IN_RANGE_MESSAGE }
-            )
+        // Being in range is not the same as having found the mark: it stands somewhere around the
+        // hunter and may well be behind a wall or a tree, so say so rather than saying nothing.
+        val (message, description) = if (state.inRange) {
+            R.string.close_look_around to CLOSE_LOOK_AROUND_MESSAGE
+        } else {
+            R.string.nothing_to_catch_in_range to NOTHING_IN_RANGE_MESSAGE
         }
+        Text(
+            text = stringResource(message),
+            style = MaterialTheme.typography.headlineSmall,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .padding(12.dp)
+                .semantics { contentDescription = description }
+        )
         ImageButton(
             drawableId = R.drawable.catch_point,
             description = BIG_CATCH_BUTTON,

@@ -30,6 +30,8 @@ data class RouteEditorState(
     val draftLongitude: Double? = null,
     val draftDescription: String = "",
     val pointEditorOpen: Boolean = false,
+    /** Set while the speech engine is loading its model, which on the first run takes seconds. */
+    val preparingSpeech: Boolean = false,
     val listening: Boolean = false,
     val recognizedPartial: String = "",
     val pointToDelete: Int? = null,

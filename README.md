@@ -203,7 +203,7 @@ gpr.key=<the token>
 `GITHUB_ACTOR` and `GITHUB_TOKEN` environment variables work as well, which is what the pipeline
 uses. The artifact version is set by `COMPASS_VERSION` in `gradle.properties`.
 
-### 3. Offline speech models (optional)
+### 3. Offline speech models
 
 The Vosk models are around 95 MB together, too much for the repository, so they are fetched on
 demand:
@@ -213,8 +213,15 @@ demand:
 ```
 
 This unpacks `vosk-model-small-pl-0.22` and `vosk-model-small-en-us-0.15` into
-`app/src/main/assets`, where `.gitignore` keeps them out of commits. Without them the app still
-works, it just goes straight to the text field instead of offering the microphone.
+`app/src/main/assets`, where `.gitignore` keeps them out of commits. Alongside each model the task
+writes a `uuid` marker, which Vosk needs to decide whether its copy of the model on the device is
+still current; the published archives do not contain one and recognition cannot start without it.
+
+Running the task by hand is rarely necessary, because asset merging depends on it, so any APK you
+assemble carries the models. Unit tests do not merge assets and therefore never trigger the
+download. An APK built without them falls back to the text field instead of offering the
+microphone, so if the app reports that speech recognition is unavailable, check that
+`app/src/main/assets/vosk-model-*/` are populated and reinstall.
 
 ### 4. Build
 

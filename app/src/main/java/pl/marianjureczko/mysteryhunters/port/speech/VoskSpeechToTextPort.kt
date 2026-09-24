@@ -61,6 +61,7 @@ class VoskSpeechToTextPort(
     private val TAG = javaClass.simpleName
 
     private var model: Model? = null
+    private var loadedLanguage: String? = null
     private var speechService: SpeechService? = null
 
     override suspend fun initialize(languageTag: String): Boolean = withContext(ioDispatcher) {
@@ -69,6 +70,11 @@ class VoskSpeechToTextPort(
             Log.i(TAG, "no offline model configured for $languageTag")
             return@withContext false
         }
+        // The microphone button initialises on every tap. Loading the model again would strand
+        // the native memory of the previous one, so an already loaded language is reused as is.
+        if (model != null && loadedLanguage == assetDirectory) {
+            return@withContext true
+        }
         if (!isModelBundled(assetDirectory)) {
             Log.i(TAG, "model $assetDirectory is not bundled, falling back to text input")
             return@withContext false
@@ -76,11 +82,15 @@ class VoskSpeechToTextPort(
         try {
             LibVosk.setLogLevel(LogLevel.WARNINGS)
             val unpackedPath = org.vosk.android.StorageService.sync(context, assetDirectory, assetDirectory)
+            model?.close()
             model = Model(unpackedPath)
+            loadedLanguage = assetDirectory
             true
         } catch (e: Exception) {
             Log.w(TAG, "offline speech recognition unavailable", e)
+            model?.close()
             model = null
+            loadedLanguage = null
             false
         }
     }
@@ -147,5 +157,6 @@ class VoskSpeechToTextPort(
         stopListening()
         model?.close()
         model = null
+        loadedLanguage = null
     }
 }

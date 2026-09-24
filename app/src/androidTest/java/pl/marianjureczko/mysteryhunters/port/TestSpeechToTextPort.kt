@@ -19,6 +19,8 @@
 
 package pl.marianjureczko.mysteryhunters.port
 
+import kotlinx.coroutines.CompletableDeferred
+
 /**
  * Stands in for Vosk. By default it reports that recognition is impossible, which is exactly the
  * situation in which the app has to fall back to the text field.
@@ -29,7 +31,16 @@ class TestSpeechToTextPort : SpeechToTextPort {
     var recognizedText: String = ""
     var released: Boolean = false
 
-    override suspend fun initialize(languageTag: String): Boolean = supported
+    /**
+     * Once set, [initialize] hangs on it. The real port needs seconds to unpack its model on the
+     * first run and a test has no other way of catching the app in that state.
+     */
+    var initializationGate: CompletableDeferred<Unit>? = null
+
+    override suspend fun initialize(languageTag: String): Boolean {
+        initializationGate?.await()
+        return supported
+    }
 
     override fun startListening(listener: SpeechToTextPort.RecognitionListener) {
         if (supported) {

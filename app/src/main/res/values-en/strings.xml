@@ -23,6 +23,7 @@
     <string name="no_description">No description</string>
     <string name="coordinates_required">Pick a place on the map first</string>
     <string name="delete_point_msg">Do you really want to remove point %1$d?</string>
+    <string name="preparing_speech">Preparing speech recognition…</string>
     <string name="listening">Listening…</string>
     <string name="speech_unavailable">Speech recognition is unavailable, please type the description</string>
     <string name="speech_failed">Speech was not recognised, please type the description</string>
@@ -36,7 +37,9 @@
 
     <!-- Camera -->
     <string name="nothing_to_catch_in_range">There is nothing to catch within range</string>
+    <string name="close_look_around">You are close, look around for the question mark - it may be hidden behind something</string>
     <string name="too_far_to_catch">You are too far away, come closer</string>
+    <string name="cannot_catch_mark_not_visible">Cannot catch, the question mark is not visible - look around</string>
 
     <!-- Point detail and collected points -->
     <string name="point_detail_title">Point</string>

@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.performTextInput
 import com.ocadotechnology.gembus.test.someString
 import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.CompletableDeferred
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import pl.marianjureczko.mysteryhunters.model.PointOfInterest
@@ -41,6 +42,8 @@ import pl.marianjureczko.mysteryhunters.screen.routeeditor.ROUTE_MAP
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.ROUTE_NAME_FIELD
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.SAVE_POINT_BUTTON
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.SAVE_ROUTE_NAME_BUTTON
+import pl.marianjureczko.mysteryhunters.screen.routeeditor.SPEECH_PREPARING_INDICATOR
+import pl.marianjureczko.mysteryhunters.screen.routeeditor.STOP_MICROPHONE_BUTTON
 import pl.marianjureczko.mysteryhunters.screen.routelist.ADD_ROUTE_BUTTON
 import pl.marianjureczko.mysteryhunters.screen.routelist.EDIT_ROUTE_BUTTON
 
@@ -131,6 +134,30 @@ class RouteEditorScreenTest : AbstractUiTest() {
 
         // then
         composeRule.onNodeWithContentDescription(POINT_DESCRIPTION_FIELD).assertIsDisplayed()
+    }
+
+    @Test
+    fun showProgressWhileTheSpeechModelIsBeingLoaded() {
+        // given
+        speechToTextPort.supported = true
+        val loading = CompletableDeferred<Unit>()
+        speechToTextPort.initializationGate = loading
+        val route = given(RouteArranger.routeWithoutPoints())
+        openEditorOf(route.name)
+        composeRule.onNodeWithContentDescription(ROUTE_MAP).performClick()
+        waitUntilDisplayed(POINT_DESCRIPTION_FIELD)
+        // the indicator spins forever, so Compose never reports itself idle on its own
+        takeOverTheComposeClock()
+
+        // when
+        composeRule.onNodeWithContentDescription(MICROPHONE_BUTTON).performClick()
+
+        // then
+        waitWhileAdvancingFrames("the loading indicator appears") { isDisplayed(SPEECH_PREPARING_INDICATOR) }
+        assertThat(isDisplayed(MICROPHONE_BUTTON)).isFalse()
+        loading.complete(Unit)
+        waitWhileAdvancingFrames("listening starts") { isDisplayed(STOP_MICROPHONE_BUTTON) }
+        assertThat(isDisplayed(SPEECH_PREPARING_INDICATOR)).isFalse()
     }
 
     private fun displayedCoordinates(): String =

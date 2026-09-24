@@ -24,6 +24,7 @@
     <string name="no_description">Brak opisu</string>
     <string name="coordinates_required">Najpierw wskaż miejsce na mapie</string>
     <string name="delete_point_msg">Czy na pewno usunąć punkt %1$d?</string>
+    <string name="preparing_speech">Przygotowywanie rozpoznawania mowy…</string>
     <string name="listening">Słucham…</string>
     <string name="speech_unavailable">Rozpoznawanie mowy jest niedostępne, wpisz opis ręcznie</string>
     <string name="speech_failed">Nie udało się rozpoznać mowy, wpisz opis ręcznie</string>
@@ -37,7 +38,9 @@
 
     <!-- Camera -->
     <string name="nothing_to_catch_in_range">W zasięgu nie ma nic do złapania</string>
+    <string name="close_look_around">Jesteś blisko, rozejrzyj się za znakiem zapytania - może być schowany za czymś</string>
     <string name="too_far_to_catch">Jesteś za daleko, podejdź bliżej</string>
+    <string name="cannot_catch_mark_not_visible">Nie możesz złapać, znaku zapytania nie widać - rozejrzyj się</string>
 
     <!-- Point detail and collected points -->
     <string name="point_detail_title">Punkt</string>

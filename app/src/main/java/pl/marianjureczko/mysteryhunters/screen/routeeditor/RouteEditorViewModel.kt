@@ -173,8 +173,16 @@ class RouteEditorViewModel @Inject constructor(
      * user is told and keeps using the always present text field.
      */
     fun startListening(languageTag: String) {
+        if (_state.value.preparingSpeech || _state.value.listening) {
+            return
+        }
         viewModelScope.launch {
-            if (!speechToTextPort.initialize(languageTag)) {
+            // The first initialisation unpacks around 90 MB of language model out of the assets and
+            // takes a few seconds, so the button is swapped for a spinner instead of looking dead.
+            _state.value = _state.value.copy(preparingSpeech = true)
+            val ready = speechToTextPort.initialize(languageTag)
+            _state.value = _state.value.copy(preparingSpeech = false)
+            if (!ready) {
                 _state.value = _state.value.copy(messageId = R.string.speech_unavailable, listening = false)
                 return@launch
             }
