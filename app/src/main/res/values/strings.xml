@@ -17,6 +17,8 @@
     <string name="route_editor_title">Edycja trasy</string>
     <string name="route_name_label">Nazwa trasy</string>
     <string name="name_required">Najpierw podaj nazwę trasy</string>
+    <string name="name_too_long">Nazwa trasy może mieć najwyżej %1$d znaków</string>
+    <string name="add_route">Dodaj trasę</string>
     <string name="tap_map_to_add_point">Dotknij mapy, aby dodać punkt</string>
     <string name="point_number">Punkt %1$d</string>
     <string name="coordinates">%1$.5f, %2$.5f</string>

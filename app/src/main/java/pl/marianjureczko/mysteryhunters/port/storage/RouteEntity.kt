@@ -26,5 +26,6 @@ import androidx.room.PrimaryKey
 data class RouteEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val lastSelectedPointId: Int?
+    val lastSelectedPointId: Int?,
+    val createdAt: Long = 0L
 )

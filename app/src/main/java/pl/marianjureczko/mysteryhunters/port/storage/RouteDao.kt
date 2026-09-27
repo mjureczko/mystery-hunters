@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.Flow
 interface RouteDao {
 
     @Transaction
-    @Query("SELECT * FROM routes ORDER BY name COLLATE NOCASE ASC")
+    @Query("SELECT * FROM routes ORDER BY createdAt DESC, id DESC")
     fun observeRoutes(): Flow<List<RouteWithPoints>>
 
     @Transaction

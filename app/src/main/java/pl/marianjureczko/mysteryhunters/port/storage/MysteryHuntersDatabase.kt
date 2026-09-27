@@ -24,7 +24,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [RouteEntity::class, PointOfInterestEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class MysteryHuntersDatabase : RoomDatabase() {

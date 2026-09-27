@@ -26,7 +26,8 @@ fun RouteWithPoints.toModel(): Route = Route(
     id = route.id,
     name = route.name,
     pointsOfInterest = points.sortedBy { it.pointId }.map { it.toModel() },
-    lastSelectedPointId = route.lastSelectedPointId
+    lastSelectedPointId = route.lastSelectedPointId,
+    createdAt = route.createdAt
 )
 
 fun PointOfInterestEntity.toModel(): PointOfInterest = PointOfInterest(
@@ -40,7 +41,8 @@ fun PointOfInterestEntity.toModel(): PointOfInterest = PointOfInterest(
 fun Route.toEntity(): RouteEntity = RouteEntity(
     id = id,
     name = name,
-    lastSelectedPointId = lastSelectedPointId
+    lastSelectedPointId = lastSelectedPointId,
+    createdAt = createdAt
 )
 
 fun PointOfInterest.toEntity(routeId: Long): PointOfInterestEntity = PointOfInterestEntity(

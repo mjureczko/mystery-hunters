@@ -22,6 +22,7 @@ package pl.marianjureczko.mysteryhunters.port.storage
 import androidx.room.Embedded
 import androidx.room.Relation
 
+//TODO t: looks like overcomplicated solution; Route contains points, so why RouteEntity needs a wrapper in the form of RouteWitPoints?
 data class RouteWithPoints(
     @Embedded val route: RouteEntity,
     @Relation(parentColumn = "id", entityColumn = "routeId")

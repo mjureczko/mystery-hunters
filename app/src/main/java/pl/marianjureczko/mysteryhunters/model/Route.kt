@@ -29,10 +29,12 @@ data class Route(
     val id: Long = NOT_PERSISTED,
     val name: String,
     val pointsOfInterest: List<PointOfInterest> = emptyList(),
-    val lastSelectedPointId: Int? = null
+    val lastSelectedPointId: Int? = null,
+    val createdAt: Long = 0L
 ) {
     companion object {
         const val NOT_PERSISTED = 0L
+        const val MAX_NAME_LENGTH = 100
     }
 
     val isPersisted: Boolean

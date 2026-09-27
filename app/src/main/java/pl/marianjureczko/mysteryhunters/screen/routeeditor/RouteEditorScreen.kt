@@ -53,6 +53,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import pl.marianjureczko.mysteryhunters.R
 import pl.marianjureczko.mysteryhunters.model.PointOfInterest
+import pl.marianjureczko.mysteryhunters.model.Route
 import pl.marianjureczko.mysteryhunters.ui.Screen.dh
 import pl.marianjureczko.mysteryhunters.ui.components.ImageButton
 import pl.marianjureczko.mysteryhunters.ui.components.MyCard

@@ -21,6 +21,8 @@ package pl.marianjureczko.mysteryhunters.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.Module
@@ -52,10 +54,19 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object PortsModule {
 
+    //TODO t: squash all migrations before first release
+    /** Adds the route creation date used to sort the newest routes first. */
+    private val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE routes ADD COLUMN createdAt INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
     @Singleton
     @Provides
     fun database(@ApplicationContext appContext: Context): MysteryHuntersDatabase =
         Room.databaseBuilder(appContext, MysteryHuntersDatabase::class.java, MysteryHuntersDatabase.NAME)
+            .addMigrations(MIGRATION_1_2)
             .build()
 
     @Singleton

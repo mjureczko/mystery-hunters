@@ -64,7 +64,8 @@ class RouteEditorViewModel @Inject constructor(
     }
 
     fun onNameChanged(name: String) {
-        _state.value = _state.value.copy(name = name)
+        // The input field never accepts more than the allowed number of characters.
+        _state.value = _state.value.copy(name = name.take(Route.MAX_NAME_LENGTH))
     }
 
     fun saveName() {

@@ -19,22 +19,32 @@
 
 package pl.marianjureczko.mysteryhunters.screen.routelist
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -68,42 +78,89 @@ fun RouteListScreen(navController: NavController) {
                     text = stringResource(R.string.delete_route_msg, state.routeToDelete?.name ?: ""),
                     onConfirm = { viewModel.confirmDeletion() }
                 )
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                    ImageButton(
-                        drawableId = R.drawable.add_point,
-                        description = ADD_ROUTE_BUTTON,
-                        onClick = { navController.navigate(Screens.RouteEditor.doRoute(Screens.RouteEditor.NEW_ROUTE)) }
-                    )
-                }
-                if (state.routes.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.no_routes_yet),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(24.dp)
-                    )
-                } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(state.routes, key = { it.id }) { route ->
-                            RouteRow(
-                                route = route,
-                                onEdit = { navController.navigate(Screens.RouteEditor.doRoute(route.id)) },
-                                onDelete = { viewModel.askToDelete(route) },
-                                onSelect = { navController.navigate(Screens.Searching.doRoute(route.id)) }
-                            )
-                        }
-                    }
-                }
+                ListOfRoutes(state, navController, viewModel)
+                AddRouteButton(navController)
             }
         }
     )
 }
 
 @Composable
-private fun RouteRow(route: Route, onEdit: () -> Unit, onDelete: () -> Unit, onSelect: () -> Unit) {
-    MyCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+private fun AddRouteButton(navController: NavController) {
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        TextButton(
+            onClick = { navController.navigate(Screens.RouteEditor.doRoute(Screens.RouteEditor.NEW_ROUTE)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .semantics { contentDescription = ADD_ROUTE_BUTTON },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.colorPrimary),
+                contentColor = Color.White
+            ),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text(
+                text = stringResource(R.string.add_route),
+                style = MaterialTheme.typography.titleLarge.copy(fontFamily = FontFamily.Default),
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.ListOfRoutes(
+    state: RouteListState,
+    navController: NavController,
+    viewModel: RouteListViewModel
+) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .weight(1f)) {
+        if (state.routes.isEmpty()) {
+            NoRoutesYetMessage()
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(state.routes, key = { it.id }) { route ->
+                    RouteRow(
+                        route = route,
+                        onSelect = { navController.navigate(Screens.Searching.doRoute(route.id)) },
+                        onEdit = { navController.navigate(Screens.RouteEditor.doRoute(route.id)) },
+                        onDelete = { viewModel.askToDelete(route) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.NoRoutesYetMessage() {
+    Text(
+        text = stringResource(R.string.no_routes_yet),
+        style = MaterialTheme.typography.bodyLarge,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .align(Alignment.Center)
+            .fillMaxWidth()
+            .padding(24.dp)
+    )
+}
+
+@Composable
+private fun RouteRow(route: Route, onSelect: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+    MyCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable(onClick = onSelect)
+            .semantics { contentDescription = "$SELECT_ROUTE_BUTTON ${route.name}" }
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -116,7 +173,6 @@ private fun RouteRow(route: Route, onEdit: () -> Unit, onDelete: () -> Unit, onS
             }
             ImageButton(R.drawable.edit_point, "$EDIT_ROUTE_BUTTON ${route.name}", onClick = onEdit)
             ImageButton(R.drawable.delete_point, "$DELETE_ROUTE_BUTTON ${route.name}", onClick = onDelete)
-            ImageButton(R.drawable.question_mark, "$SELECT_ROUTE_BUTTON ${route.name}", onClick = onSelect)
         }
     }
 }

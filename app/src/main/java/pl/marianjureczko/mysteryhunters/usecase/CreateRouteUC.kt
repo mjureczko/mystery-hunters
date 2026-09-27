@@ -25,5 +25,8 @@ import pl.marianjureczko.mysteryhunters.port.RouteStoragePort
 class CreateRouteUC(private val storage: RouteStoragePort) {
 
     /** Creates an empty route under the given name and persists it. */
-    suspend operator fun invoke(name: String): Route = storage.save(Route(name = name.trim()))
+    suspend operator fun invoke(name: String): Route {
+        val trimmed = name.trim()
+        return storage.save(Route(name = trimmed))
+    }
 }

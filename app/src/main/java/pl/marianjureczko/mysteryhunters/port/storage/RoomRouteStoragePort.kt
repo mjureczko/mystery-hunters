@@ -32,11 +32,13 @@ class RoomRouteStoragePort(private val routeDao: RouteDao) : RouteStoragePort {
     override suspend fun load(routeId: Long): Route? = routeDao.findById(routeId)?.toModel()
 
     override suspend fun save(route: Route): Route {
+        // A route is stamped with its creation date the first time it is persisted.
+        val toSave = if (!route.isPersisted) route.copy(createdAt = System.currentTimeMillis()) else route
         val routeId = routeDao.upsert(
-            route.toEntity(),
-            route.pointsOfInterest.map { it.toEntity(route.id) }
+            toSave.toEntity(),
+            toSave.pointsOfInterest.map { it.toEntity(toSave.id) }
         )
-        return route.copy(id = routeId)
+        return toSave.copy(id = routeId)
     }
 
     override suspend fun delete(routeId: Long) = routeDao.deleteRoute(routeId)

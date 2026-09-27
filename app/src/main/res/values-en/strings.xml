@@ -16,6 +16,8 @@
     <string name="route_editor_title">Route editor</string>
     <string name="route_name_label">Route name</string>
     <string name="name_required">Give the route a name first</string>
+    <string name="name_too_long">The route name can have up to %1$d characters</string>
+    <string name="add_route">Add route</string>
     <string name="tap_map_to_add_point">Tap the map to add a point</string>
     <string name="point_number">Point %1$d</string>
     <string name="coordinates">%1$.5f, %2$.5f</string>
