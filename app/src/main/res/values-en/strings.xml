@@ -7,14 +7,14 @@
     <string name="no">No</string>
 
     <!-- Route list -->
-    <string name="route_list_title">Routes</string>
+    <string name="route_list_title">Choose a route for your expedition</string>
     <string name="no_routes_yet">There are no routes yet. Add the first one with the button above.</string>
     <string name="points_summary">Points: %1$d / %2$d</string>
     <string name="delete_route_msg">Do you really want to remove the route \"%1$s\"?</string>
 
     <!-- Route editor -->
     <string name="route_editor_title">Route editor</string>
-    <string name="route_name_label">Route name</string>
+    <string name="route_name_label">Enter route name</string>
     <string name="name_required">Give the route a name first</string>
     <string name="name_too_long">The route name can have up to %1$d characters</string>
     <string name="add_route">Add route</string>

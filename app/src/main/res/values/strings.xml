@@ -8,14 +8,14 @@
     <string name="no">Nie</string>
 
     <!-- Route list -->
-    <string name="route_list_title">Trasy</string>
+    <string name="route_list_title">Wybierz trasę do poszukiwań</string>
     <string name="no_routes_yet">Nie ma jeszcze żadnej trasy. Dodaj pierwszą przyciskiem powyżej.</string>
     <string name="points_summary">Punkty: %1$d / %2$d</string>
     <string name="delete_route_msg">Czy na pewno usunąć trasę „%1$s”?</string>
 
     <!-- Route editor -->
     <string name="route_editor_title">Edycja trasy</string>
-    <string name="route_name_label">Nazwa trasy</string>
+    <string name="route_name_label">Wpisz nazwa trasy</string>
     <string name="name_required">Najpierw podaj nazwę trasy</string>
     <string name="name_too_long">Nazwa trasy może mieć najwyżej %1$d znaków</string>
     <string name="add_route">Dodaj trasę</string>
