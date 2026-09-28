@@ -19,10 +19,10 @@
 
 package pl.marianjureczko.mysteryhunters.usecase
 
-import com.ocadotechnology.gembus.test.someFloat
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset.offset
 import org.junit.jupiter.api.Test
+import pl.marianjureczko.mysteryhunters.testdata.someFloatBetween
 import pl.marianjureczko.mysteryhunters.usecase.CalculateMarkerPositionUC.Companion.FARTHEST_RENDERING_DISTANCE_IN_METERS
 import pl.marianjureczko.mysteryhunters.usecase.CalculateMarkerPositionUC.Companion.NEAREST_RENDERING_DISTANCE_IN_METERS
 
@@ -109,10 +109,10 @@ class CalculateMarkerPositionUCTest {
     @Test
     fun `SHOULD keep the marker slightly below eye level`() {
         // given
-        val distance = someFloat(NEAREST_RENDERING_DISTANCE_IN_METERS, FARTHEST_RENDERING_DISTANCE_IN_METERS)
+        val distance = someFloatBetween(NEAREST_RENDERING_DISTANCE_IN_METERS, FARTHEST_RENDERING_DISTANCE_IN_METERS)
 
         // when
-        val actual = sut(someFloat(0f, 360f), someFloat(0f, 360f), distance)
+        val actual = sut(someFloatBetween(0f, 360f), someFloatBetween(0f, 360f), distance)
 
         // then
         assertThat(actual.y).isLessThan(0f)

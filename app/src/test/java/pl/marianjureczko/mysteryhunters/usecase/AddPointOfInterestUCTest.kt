@@ -20,7 +20,6 @@
 package pl.marianjureczko.mysteryhunters.usecase
 
 import com.ocadotechnology.gembus.test.some
-import com.ocadotechnology.gembus.test.someDouble
 import com.ocadotechnology.gembus.test.someString
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
@@ -29,6 +28,7 @@ import pl.marianjureczko.mysteryhunters.model.PointOfInterest
 import pl.marianjureczko.mysteryhunters.model.Route
 import pl.marianjureczko.mysteryhunters.model.RouteArranger
 import pl.marianjureczko.mysteryhunters.port.TestRouteStoragePort
+import pl.marianjureczko.mysteryhunters.testdata.someDoubleBetween
 
 class AddPointOfInterestUCTest {
 
@@ -41,7 +41,7 @@ class AddPointOfInterestUCTest {
         val route = RouteArranger.routeWithoutPoints()
 
         // when
-        val actual = sut(route, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(actual.pointsOfInterest).hasSize(1)
@@ -54,7 +54,7 @@ class AddPointOfInterestUCTest {
         val route = RouteArranger.routeWithPoints(3)
 
         // when
-        val actual = sut(route, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(actual.pointsOfInterest.map { it.id }).containsExactly(1, 2, 3, 4)
@@ -66,7 +66,7 @@ class AddPointOfInterestUCTest {
         val route = RouteArranger.routeWithPoints(3).withoutPoint(2)
 
         // when
-        val actual = sut(route, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(actual.pointsOfInterest.map { it.id }).containsExactly(1, 3, 4)
@@ -78,7 +78,7 @@ class AddPointOfInterestUCTest {
         val route = RouteArranger.routeWithPoints(3).withoutPoint(3)
 
         // when
-        val actual = sut(route, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(actual.pointsOfInterest.map { it.id }).containsExactly(1, 2, 3)
@@ -88,8 +88,8 @@ class AddPointOfInterestUCTest {
     fun `SHOULD store the given coordinates and description`() = runTest {
         // given
         val route = RouteArranger.routeWithoutPoints()
-        val latitude = someDouble(-90.0, 90.0)
-        val longitude = someDouble(-180.0, 180.0)
+        val latitude = someDoubleBetween(-90.0, 90.0)
+        val longitude = someDoubleBetween(-180.0, 180.0)
         val description = someString()
 
         // when
@@ -114,7 +114,7 @@ class AddPointOfInterestUCTest {
         val route = some<Route>()
 
         // when
-        val actual = sut(route, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(storage.stored(actual.id)).isEqualTo(actual)

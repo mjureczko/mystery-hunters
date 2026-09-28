@@ -31,8 +31,8 @@ import pl.marianjureczko.mysteryhunters.screen.camera.AR_SCENE
 import pl.marianjureczko.mysteryhunters.screen.camera.BIG_CATCH_BUTTON
 import pl.marianjureczko.mysteryhunters.screen.camera.CAMERA_PREVIEW
 import pl.marianjureczko.mysteryhunters.screen.camera.CLOSE_LOOK_AROUND_MESSAGE
-import pl.marianjureczko.mysteryhunters.screen.camera.MARK_NOT_VISIBLE_DIALOG
 import pl.marianjureczko.mysteryhunters.screen.camera.FLAT_QUESTION_MARK
+import pl.marianjureczko.mysteryhunters.screen.camera.MARK_NOT_VISIBLE_DIALOG
 import pl.marianjureczko.mysteryhunters.screen.camera.NOTHING_IN_RANGE_MESSAGE
 import pl.marianjureczko.mysteryhunters.screen.camera.TOO_FAR_DIALOG
 import pl.marianjureczko.mysteryhunters.screen.pointdetail.POINT_DESCRIPTION_LABEL

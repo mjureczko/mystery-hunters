@@ -20,9 +20,9 @@
 package pl.marianjureczko.mysteryhunters.model
 
 import com.ocadotechnology.gembus.test.CustomArranger
-import com.ocadotechnology.gembus.test.someDouble
 import com.ocadotechnology.gembus.test.somePositiveInt
 import com.ocadotechnology.gembus.test.someString
+import pl.marianjureczko.mysteryhunters.testdata.someDoubleBetween
 
 /**
  * Keeps the invariants a point always has: a positive id, coordinates that exist on Earth and,
@@ -36,8 +36,8 @@ class PointOfInterestArranger : CustomArranger<PointOfInterest>() {
 
     override fun instance(): PointOfInterest = PointOfInterest(
         id = somePositiveInt(MAX_GENERATED_ID),
-        latitude = someDouble(-90.0, 90.0),
-        longitude = someDouble(-180.0, 180.0),
+        latitude = someDoubleBetween(-90.0, 90.0),
+        longitude = someDoubleBetween(-180.0, 180.0),
         description = someString(),
         caught = false
     )

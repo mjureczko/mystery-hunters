@@ -19,13 +19,13 @@
 
 package pl.marianjureczko.mysteryhunters.usecase
 
-import com.ocadotechnology.gembus.test.someDouble
 import com.ocadotechnology.gembus.test.someString
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import pl.marianjureczko.mysteryhunters.model.RouteArranger
 import pl.marianjureczko.mysteryhunters.port.TestRouteStoragePort
+import pl.marianjureczko.mysteryhunters.testdata.someDoubleBetween
 
 class UpdatePointOfInterestUCTest {
 
@@ -37,8 +37,8 @@ class UpdatePointOfInterestUCTest {
         // given
         val route = RouteArranger.routeWithPoints(3)
         val edited = route.pointsOfInterest[1]
-        val latitude = someDouble(-90.0, 90.0)
-        val longitude = someDouble(-180.0, 180.0)
+        val latitude = someDoubleBetween(-90.0, 90.0)
+        val longitude = someDoubleBetween(-180.0, 180.0)
         val description = someString()
 
         // when
@@ -56,7 +56,7 @@ class UpdatePointOfInterestUCTest {
         val edited = route.pointsOfInterest.first()
 
         // when
-        val actual = sut(route, edited.id, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, edited.id, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(actual.pointsOfInterest.map { it.id })
@@ -70,7 +70,7 @@ class UpdatePointOfInterestUCTest {
         val edited = route.pointsOfInterest[0]
 
         // when
-        val actual = sut(route, edited.id, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, edited.id, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(actual.pointsOfInterest.filter { it.id != edited.id })
@@ -84,7 +84,7 @@ class UpdatePointOfInterestUCTest {
         val unknownId = route.nextPointId()
 
         // when
-        val actual = sut(route, unknownId, someDouble(-90.0, 90.0), someDouble(-180.0, 180.0), someString())
+        val actual = sut(route, unknownId, someDoubleBetween(-90.0, 90.0), someDoubleBetween(-180.0, 180.0), someString())
 
         // then
         assertThat(actual).isEqualTo(route)
