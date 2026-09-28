@@ -25,11 +25,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,8 +41,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -152,17 +160,34 @@ fun RouteEditorScreen(navController: NavController) {
 
 @Composable
 private fun RouteNameRow(name: String, onNameChanged: (String) -> Unit, onSaveName: () -> Unit) {
+    var editing by remember { mutableStateOf(false) }
+    val keyboard = LocalSoftwareKeyboardController.current
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
             value = name,
-            onValueChange = onNameChanged,
+            onValueChange = {
+                editing = true
+                onNameChanged(it)
+            },
             singleLine = true,
             label = { Text(stringResource(R.string.route_name_label)) },
             modifier = Modifier
                 .weight(1f)
+                .onFocusChanged { if (it.isFocused) editing = true }
                 .semantics { contentDescription = ROUTE_NAME_FIELD }
         )
-        ImageButton(R.drawable.save_point, SAVE_ROUTE_NAME_BUTTON, onClick = onSaveName)
+        val spaceForButton = 48.dp
+        if (editing) {
+            Box(modifier = Modifier.size(spaceForButton), contentAlignment = Alignment.Center) {
+                ImageButton(R.drawable.save_point, SAVE_ROUTE_NAME_BUTTON, onClick = {
+                    editing = false
+                    keyboard?.hide()
+                    onSaveName()
+                })
+            }
+        } else {
+            Spacer(modifier = Modifier.size(spaceForButton))
+        }
     }
 }
 

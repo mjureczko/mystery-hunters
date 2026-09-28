@@ -166,6 +166,11 @@ Every port is replaced by a test double through `TestPortsModule`, so there is n
 ./gradlew connectedDebugAndroidTest
 ```
 
+You can check available emulators with:
+```bash
+adb devices -l
+```
+
 An emulator to run them on, if there is none yet:
 
 ```bash
