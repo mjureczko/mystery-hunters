@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,11 +48,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -72,7 +75,7 @@ import java.util.Locale
 const val ROUTE_NAME_FIELD = "Route name"
 const val SAVE_ROUTE_NAME_BUTTON = "Save route name"
 const val POINT_DESCRIPTION_FIELD = "Point description"
-const val POINT_COORDINATES_LABEL = "Point coordinates"
+const val POINT_EDITOR_CARD = "Point editor card"
 const val SAVE_POINT_BUTTON = "Save point"
 const val CLOSE_POINT_EDITOR_BUTTON = "Close point editor"
 const val MICROPHONE_BUTTON = "Dictate description"
@@ -81,6 +84,10 @@ const val SPEECH_PREPARING_INDICATOR = "Preparing speech recognition"
 const val EDIT_POINT_BUTTON = "Edit point"
 const val DELETE_POINT_BUTTON = "Delete point"
 const val POINTS_LIST = "Points list"
+
+private const val MAP_WEIGHT = 2f
+private const val MAP_MIN_HEIGHT = 0.34f
+private const val LIST_WEIGHT = 1f
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -104,6 +111,7 @@ fun RouteEditorScreen(navController: NavController) {
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxSize()
+                    .imePadding()
                     .padding(horizontal = 8.dp)
             ) {
                 YesNoDialog(
@@ -117,14 +125,11 @@ fun RouteEditorScreen(navController: NavController) {
                     onNameChanged = { viewModel.onNameChanged(it) },
                     onSaveName = { viewModel.saveName() }
                 )
-                OpenStreetMap(
+                PointsList(
                     points = state.route.pointsOfInterest,
-                    draftLatitude = state.draftLatitude,
-                    draftLongitude = state.draftLongitude,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(0.35.dh),
-                    onMapTapped = { latitude, longitude -> viewModel.onMapTapped(latitude, longitude) }
+                    onEdit = { viewModel.editPoint(it) },
+                    onDelete = { viewModel.askToDeletePoint(it) },
+                    modifier = Modifier.weight(LIST_WEIGHT)
                 )
                 if (state.pointEditorOpen) {
                     PointEditor(
@@ -148,10 +153,24 @@ fun RouteEditorScreen(navController: NavController) {
                         modifier = Modifier.padding(vertical = 6.dp)
                     )
                 }
-                PointsList(
+                OpenStreetMap(
                     points = state.route.pointsOfInterest,
-                    onEdit = { viewModel.editPoint(it) },
-                    onDelete = { viewModel.askToDeletePoint(it) }
+                    draftLatitude = state.draftLatitude,
+                    draftLongitude = state.draftLongitude,
+                    editedPointId = state.editedPointId,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(MAP_WEIGHT)
+                        .layout { measurable, constraints ->
+                            // The weighted share can shrink under the keyboard; the map keeps at
+                            // least MAP_MIN_HEIGHT and the surplus is hidden behind the keyboard.
+                            val height = constraints.maxHeight.coerceAtLeast(MAP_MIN_HEIGHT.dh.roundToPx())
+                            val placeable = measurable.measure(
+                                constraints.copy(minHeight = height, maxHeight = height)
+                            )
+                            layout(constraints.maxWidth, height) { placeable.placeRelative(0, 0) }
+                        },
+                    onMapTapped = { latitude, longitude -> viewModel.onMapTapped(latitude, longitude) }
                 )
             }
         }
@@ -200,20 +219,26 @@ private fun PointEditor(
     onStartListening: () -> Unit,
     onStopListening: () -> Unit
 ) {
-    MyCard(modifier = Modifier.fillMaxWidth()) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    val coordinates = stringResource(
+        R.string.coordinates,
+        state.draftLatitude ?: 0.0,
+        state.draftLongitude ?: 0.0
+    )
+    MyCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics {
+                contentDescription = POINT_EDITOR_CARD
+                stateDescription = coordinates
+            }
+    ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = stringResource(R.string.point_number, state.editedPointDisplayId),
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Text(
-                text = stringResource(
-                    R.string.coordinates,
-                    state.draftLatitude ?: 0.0,
-                    state.draftLongitude ?: 0.0
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.semantics { contentDescription = POINT_COORDINATES_LABEL }
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
@@ -253,12 +278,18 @@ private fun PointEditor(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ImageButton(R.drawable.keyboard_input, CLOSE_POINT_EDITOR_BUTTON, onClick = onClose)
+                ImageButton(R.drawable.keyboard_input, CLOSE_POINT_EDITOR_BUTTON, onClick = {
+                    keyboard?.hide()
+                    onClose()
+                })
                 ImageButton(
                     drawableId = R.drawable.save_point,
                     description = SAVE_POINT_BUTTON,
                     enabled = state.canSavePoint,
-                    onClick = onSave
+                    onClick = {
+                        keyboard?.hide()
+                        onSave()
+                    }
                 )
             }
         }
@@ -266,10 +297,17 @@ private fun PointEditor(
 }
 
 @Composable
-private fun PointsList(points: List<PointOfInterest>, onEdit: (Int) -> Unit, onDelete: (Int) -> Unit) {
-    LazyColumn(modifier = Modifier
-        .fillMaxSize()
-        .semantics { contentDescription = POINTS_LIST }) {
+private fun PointsList(
+    points: List<PointOfInterest>,
+    onEdit: (Int) -> Unit,
+    onDelete: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = POINTS_LIST }
+    ) {
         items(points, key = { it.id }) { point ->
             MyCard(modifier = Modifier.fillMaxWidth()) {
                 Row(

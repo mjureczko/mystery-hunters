@@ -19,14 +19,17 @@
 
 package pl.marianjureczko.mysteryhunters
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.click
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import com.ocadotechnology.gembus.test.someString
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.CompletableDeferred
@@ -34,10 +37,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import pl.marianjureczko.mysteryhunters.model.PointOfInterest
 import pl.marianjureczko.mysteryhunters.model.RouteArranger
-import androidx.compose.ui.semantics.SemanticsProperties
+import pl.marianjureczko.mysteryhunters.screen.routeeditor.CLOSE_POINT_EDITOR_BUTTON
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.MICROPHONE_BUTTON
-import pl.marianjureczko.mysteryhunters.screen.routeeditor.POINT_COORDINATES_LABEL
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.POINT_DESCRIPTION_FIELD
+import pl.marianjureczko.mysteryhunters.screen.routeeditor.POINT_EDITOR_CARD
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.ROUTE_MAP
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.ROUTE_NAME_FIELD
 import pl.marianjureczko.mysteryhunters.screen.routeeditor.SAVE_POINT_BUTTON
@@ -160,11 +163,68 @@ class RouteEditorScreenTest : AbstractUiTest() {
         assertThat(isDisplayed(SPEECH_PREPARING_INDICATOR)).isFalse()
     }
 
-    private fun displayedCoordinates(): String =
-        composeRule.onNodeWithContentDescription(POINT_COORDINATES_LABEL)
+    @Test
+    fun hideTheCoordinatesOnThePointCardButKeepThemAccessible() {
+        // given
+        val route = given(RouteArranger.routeWithPoints(2))
+        val edited = route.pointsOfInterest.first()
+        openEditorOf(route.name)
+        composeRule.onNodeWithContentDescription("Edit point ${edited.id}").performClick()
+        waitUntilDisplayed(POINT_EDITOR_CARD)
+
+        // when
+        val coordinates = displayedCoordinates()
+
+        // then
+        assertThat(coordinates).isNotBlank()
+        // The coordinates are only in the card state for accessibility services, never as text.
+        composeRule.onAllNodesWithText(coordinates).assertCountEquals(0)
+    }
+
+    @Test
+    fun centreThePointNumberHeaderInThePointCard() {
+        // given
+        val route = given(RouteArranger.routeWithPoints(2))
+        val edited = route.pointsOfInterest.first()
+        openEditorOf(route.name)
+        composeRule.onNodeWithContentDescription("Edit point ${edited.id}").performClick()
+        waitUntilDisplayed(POINT_EDITOR_CARD)
+
+        // when
+        val card = composeRule.onNodeWithContentDescription(POINT_EDITOR_CARD)
             .fetchSemanticsNode()
-            .config[SemanticsProperties.Text]
-            .joinToString { it.text }
+            .boundsInRoot
+        // The point number also shows in the list below, so take the header inside the card.
+        val header = composeRule.onAllNodesWithText(composeRule.activity.getString(R.string.point_number, edited.id))
+            .fetchSemanticsNodes()
+            .first { card.top <= it.boundsInRoot.top && it.boundsInRoot.bottom <= card.bottom }
+            .boundsInRoot
+
+        // then
+        assertThat(header.center.x).isCloseTo(card.center.x, org.assertj.core.data.Offset.offset(1.0f))
+    }
+
+    @Test
+    fun keepThePointEditorVisibleAboveTheKeyboardWhenTheDescriptionIsFocused() {
+        // given
+        val route = given(RouteArranger.routeWithoutPoints())
+        openEditorOf(route.name)
+        composeRule.onNodeWithContentDescription(ROUTE_MAP).performClick()
+        waitUntilDisplayed(POINT_DESCRIPTION_FIELD)
+
+        // when
+        composeRule.onNodeWithContentDescription(POINT_DESCRIPTION_FIELD).performClick()
+
+        // then
+        composeRule.onNodeWithContentDescription(POINT_DESCRIPTION_FIELD).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(SAVE_POINT_BUTTON).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(CLOSE_POINT_EDITOR_BUTTON).assertIsDisplayed()
+    }
+
+    private fun displayedCoordinates(): String =
+        composeRule.onNodeWithContentDescription(POINT_EDITOR_CARD)
+            .fetchSemanticsNode()
+            .config[SemanticsProperties.StateDescription]
 
     private fun openEditorOf(routeName: String) {
         waitUntilDisplayed("$EDIT_ROUTE_BUTTON $routeName")

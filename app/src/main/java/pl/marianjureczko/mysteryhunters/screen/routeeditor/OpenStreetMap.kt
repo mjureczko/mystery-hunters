@@ -21,6 +21,7 @@ package pl.marianjureczko.mysteryhunters.screen.routeeditor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -41,17 +42,21 @@ import pl.marianjureczko.mysteryhunters.model.PointOfInterest
 const val ROUTE_MAP = "Route map"
 
 private const val DEFAULT_ZOOM = 16.0
-private val DEFAULT_CENTER = GeoPoint(52.2297, 21.0122)
+private val DEFAULT_CENTER = GeoPoint(51.12, 17.04)
 
 /**
  * OpenStreetMap based map, used to place and move the points of a route. osmdroid needs no access
  * token, which keeps the app free of proprietary map credentials.
+ *
+ * While the point editor is open, [editedPointId] is the point being edited; its marker is not
+ * drawn and the draft marker takes its place, so the point is never rendered twice.
  */
 @Composable
 fun OpenStreetMap(
     points: List<PointOfInterest>,
     draftLatitude: Double?,
     draftLongitude: Double?,
+    editedPointId: Int? = null,
     modifier: Modifier = Modifier,
     onMapTapped: (Double, Double) -> Unit
 ) {
@@ -68,6 +73,13 @@ fun OpenStreetMap(
 
     DisposableEffect(Unit) {
         onDispose { mapView.onDetach() }
+    }
+
+    // When entering screen, opens the map on point belong to route
+    LaunchedEffect( points.firstOrNull()) {
+            points.firstOrNull()?.let {
+                mapView.controller.setCenter(GeoPoint(it.latitude, it.longitude))
+            }
     }
 
     AndroidView(
@@ -87,7 +99,7 @@ fun OpenStreetMap(
                     override fun longPressHelper(geoPoint: GeoPoint?): Boolean = false
                 })
             )
-            points.forEach { point ->
+            points.filterNot { it.id == editedPointId }.forEach { point ->
                 view.overlays.add(
                     Marker(view).apply {
                         position = GeoPoint(point.latitude, point.longitude)
@@ -98,19 +110,14 @@ fun OpenStreetMap(
                 )
             }
             if (draftLatitude != null && draftLongitude != null) {
-                val draft = GeoPoint(draftLatitude, draftLongitude)
                 view.overlays.add(
                     Marker(view).apply {
-                        position = draft
+                        position = GeoPoint(draftLatitude, draftLongitude)
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        title = editedPointId?.toString()
                         pinIcon?.let { icon = it }
                     }
                 )
-                view.controller.animateTo(draft)
-            } else {
-                points.firstOrNull()?.let {
-                    view.controller.setCenter(GeoPoint(it.latitude, it.longitude))
-                }
             }
             view.invalidate()
         }
