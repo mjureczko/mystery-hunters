@@ -50,7 +50,7 @@ import pl.marianjureczko.mysteryhunters.R
 import pl.marianjureczko.mysteryhunters.screen.Screens
 import pl.marianjureczko.mysteryhunters.ui.Screen.dh
 import pl.marianjureczko.mysteryhunters.ui.Screen.dw
-import pl.marianjureczko.mysteryhunters.ui.components.ImageButton
+import pl.marianjureczko.mysteryhunters.ui.components.ImageButton3D
 import pl.marianjureczko.mysteryhunters.ui.components.TopBar
 import pl.marianjureczko.poszukiwacz.compass.api.AndroidLocation
 import pl.marianjureczko.poszukiwacz.compass.api.CompassAndSteps
@@ -178,24 +178,36 @@ private fun Buttons(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp),
+            .padding(8.dp, 16.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.width(0.2.dw), horizontalAlignment = Alignment.CenterHorizontally) {
-            ImageButton(R.drawable.change_point, CHANGE_POINT_BUTTON, enabled = enabled, onClick = onChangePoint)
+            ImageButton3D(
+                drawableId = R.drawable.change,
+                description = CHANGE_POINT_BUTTON,
+                enabled = enabled,
+                padding = 6.dp,
+                onClick = onChangePoint
+            )
         }
-        Column(modifier = Modifier.width(0.5.dw), horizontalAlignment = Alignment.CenterHorizontally) {
-            ImageButton(
-                drawableId = R.drawable.question_mark,
+        Column(modifier = Modifier.width(0.6.dw), horizontalAlignment = Alignment.CenterHorizontally) {
+            ImageButton3D(
+                drawableId = R.drawable.glasses,
                 description = CATCH_POINT_BUTTON,
                 enabled = enabled,
-                padding = 4.dp,
+                padding = 6.dp,
                 onClick = onCatch
             )
         }
         Column(modifier = Modifier.width(0.2.dw), horizontalAlignment = Alignment.CenterHorizontally) {
-            ImageButton(R.drawable.collected_points, COLLECTED_POINTS_BUTTON, onClick = onCollectedPoints)
+            ImageButton3D(
+                drawableId = R.drawable.stash,
+                description = COLLECTED_POINTS_BUTTON,
+                enabled = enabled,
+                padding = 6.dp,
+                onClick = onCollectedPoints
+            )
         }
     }
 }
